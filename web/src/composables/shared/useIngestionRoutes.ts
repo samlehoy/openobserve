@@ -28,6 +28,7 @@ import FileBeat from "@/components/ingestion/logs/FileBeat.vue";
 import OpenTelemetry from "@/components/ingestion/traces/OpenTelemetry.vue";
 import PrometheusConfig from "@/components/ingestion/metrics/PrometheusConfig.vue";
 import VMagentConfig from "@/components/ingestion/metrics/VMagentConfig.vue";
+import NightingaleConfig from "@/components/ingestion/metrics/NightingaleConfig.vue";
 import OtelCollector from "@/components/ingestion/metrics/OtelCollector.vue";
 import TelegrafConfig from "@/components/ingestion/metrics/TelegrafConfig.vue";
 import CloudWatchMetricConfig from "@/components/ingestion/metrics/CloudWatchMetrics.vue";
@@ -244,6 +245,14 @@ const useIngestionRoutes = () => {
                   path: "vmagent",
                   name: "vmagent",
                   component: VMagentConfig,
+                  beforeEnter(to: any, from: any, next: any) {
+                    routeGuard(to, from, next);
+                  },
+                },
+                {
+                  path: "nightingale",
+                  name: "nightingale",
+                  component: NightingaleConfig,
                   beforeEnter(to: any, from: any, next: any) {
                     routeGuard(to, from, next);
                   },
@@ -799,6 +808,10 @@ const useIngestionRoutes = () => {
           },
           children: [
             {
+              // Named so the router doesn't warn about an unnamed empty-path
+              // child under a named parent. Nothing navigates to this name; it
+              // exists only to land /ai-integrations on the first integration.
+              name: "ai-integrations-default",
               path: "",
               redirect: () => {
                 const first = aiCategories[0].integrations[0];
