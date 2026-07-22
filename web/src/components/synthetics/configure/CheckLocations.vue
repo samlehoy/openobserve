@@ -9,7 +9,11 @@ import OIcon from '@/lib/core/Icon/OIcon.vue'
 import OCheckboxGroup from '@/lib/forms/Checkbox/OCheckboxGroup.vue'
 import OCheckbox from '@/lib/forms/Checkbox/OCheckbox.vue'
 
-const props = defineProps<{ check: BrowserCheck; locations: SyntheticsLocation[] }>()
+const props = defineProps<{
+  check: BrowserCheck;
+  locations: SyntheticsLocation[];
+  validationErrors?: Record<string, string>;
+}>();
 const emit = defineEmits<{ 'update:check': [value: BrowserCheck] }>()
 
 const { t } = useI18n()
@@ -66,6 +70,13 @@ const selectedLocations = computed({
     >
       {{ t('synthetics.locations.empty') }}
     </div>
+    <p
+      v-if="props.validationErrors?.locations"
+      class="mt-2 text-xs text-status-error-text"
+      data-test="synthetics-check-locations-error"
+    >
+      {{ props.validationErrors.locations }}
+    </p>
     </div>
   </div>
 </template>

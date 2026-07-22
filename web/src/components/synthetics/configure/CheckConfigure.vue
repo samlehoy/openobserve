@@ -73,12 +73,14 @@ function handleUpdate(value: BrowserCheck) {
       />
       <CheckSchedule
         :check="check"
+        :validation-errors="props.validationErrors ?? {}"
         data-test="synthetics-check-configure-schedule"
         @update:check="handleUpdate"
       />
       <CheckAlerts
         :check="check"
         :destinations="destinations ?? []"
+        :validation-errors="props.validationErrors ?? {}"
         data-test="synthetics-check-configure-alerts"
         @update:check="handleUpdate"
         @refresh:destinations="emit('refresh:destinations')"
@@ -86,6 +88,7 @@ function handleUpdate(value: BrowserCheck) {
       <CheckLocations
         :check="check"
         :locations="locations ?? []"
+        :validation-errors="props.validationErrors ?? {}"
         data-test="synthetics-check-configure-locations"
         @update:check="handleUpdate"
       />
@@ -94,6 +97,7 @@ function handleUpdate(value: BrowserCheck) {
         :check="check"
         :browsers="browsers"
         :devices="devices"
+        :validation-errors="props.validationErrors ?? {}"
         data-test="synthetics-check-configure-browser-devices"
         @update:check="handleUpdate"
       />
