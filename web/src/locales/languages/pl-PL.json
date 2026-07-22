@@ -7718,7 +7718,7 @@
       "sessions": "Przeglądaj i sprawdzaj sesje agenta krok po kroku",
       "agentGraph": "Zobacz, z czym wchodzą w interakcje twoje agenty — narzędzia, modele, usługi i magazyny danych",
       "agentBehavior": "Znajdź agentów zablokowanych w pętlach i błędy powodujące ich awarie",
-      "quality": "Oceniaj i śledź jakość odpowiedzi LLM",
+      "quality": "Śledź jakość ocen w zakresie span, trace i sesji",
       "evalJobs": "Uruchamiaj i monitoruj zadania oceny w swoich sesjach",
       "scorers": "Twórz i zarządzaj oceniającymi, którzy oceniają wyniki LLM",
       "scoreConfigs": "Skonfiguruj kryteria oceny używane w twoich ewaluacjach"
@@ -7868,7 +7868,22 @@
     },
     "quality": {
       "scopeLabel": "Wszystkie wymiary jakości w tym obszarze roboczym",
+      "agentLabel": "Agent",
       "agentPlaceholder": "Wszyscy agenci",
+      "kpisAriaLabel": "KPI poziomu 1",
+      "dataTypes": {
+        "numericShort": "Liczba",
+        "categoricalShort": "Kategoria",
+        "booleanShort": "Logiczny"
+      },
+      "scopes": {
+        "filterLabel": "Zakres oceny",
+        "filterHint": "Porównaj tę konfigurację oceny w zakresie celów ewaluacji.",
+        "all": "Wszystkie",
+        "span": "Span",
+        "trace": "Trace",
+        "session": "Sesja"
+      },
       "timeRange": {
         "label": "Zakres czasu",
         "last1h": "Ostatnia 1 godzina",
@@ -7882,20 +7897,20 @@
       },
       "refresh": "Odśwież",
       "kpis": {
-        "evaluated": {
-          "title": "Ocenione spany",
+        "scoreResults": {
+          "title": "Wyniki ocen",
           "unit": "",
-          "hint": "Unikalne identyfikatory span w _llm_scores w oknie"
+          "hint": "Najnowsze wyniki ocen w zakresie span, trace i sesji w oknie czasowym."
         },
         "evaluationCost": {
           "title": "Koszt oceny",
           "unit": "$",
           "hint": "Suma kosztu oceniającego LLM Judge w oknie"
         },
-        "jobSuccess": {
-          "title": "Sukces zadania",
+        "scorerSuccess": {
+          "title": "Sukces oceniającego",
           "unit": "%",
-          "hint": "Współczynnik sukcesu uruchomień zadania oceny online"
+          "hint": "Udane wywołania oceniającego jako procent wszystkich wywołań oceniającego."
         },
         "scorerFailures": {
           "title": "Błędy oceniających",
@@ -7903,11 +7918,12 @@
           "hint": "Nieudane wywołania oceniających w oknie"
         },
         "latencyP95": {
-          "title": "Opóźnienie p95",
+          "title": "Opóźnienie oceniającego p95",
           "unit": "s",
-          "hint": "Opóźnienie p95 wywołania oceniającego"
+          "hint": "95. percentyl opóźnienia wywołania oceniającego"
         },
         "vsPrev": "vs poprz",
+        "noPriorData": "brak wcześniejszych danych",
         "noData": "—"
       },
       "loading": "Ładowanie danych jakości…",
@@ -7916,7 +7932,9 @@
         "noData": "Brak ocen dla tej konfiguracji w tym oknie.",
         "empty": {
           "title": "Oczekiwanie na pierwsze oceny",
-          "description": "Żadne oceny nie trafiły do tej konfiguracji w wybranym zakresie czasu. Pojawią się tutaj automatycznie, gdy uruchomiony zostanie oceniający, który ich używa."
+          "titleScoped": "Brak ocen {scope} w tym oknie",
+          "description": "Żadne oceny nie trafiły do tej konfiguracji w wybranym zakresie czasu. Pojawią się tutaj automatycznie, gdy uruchomiony zostanie oceniający, który ich używa.",
+          "descriptionScoped": "Brak ocen {scope} dla tej konfiguracji w wybranym przedziale czasowym. Wybierz inny zakres lub rozszerz przedział czasowy."
         },
         "drillTitle": "Przejdź do śladów",
         "trendTitle": "Trend",
@@ -7925,12 +7943,18 @@
         "compositionTitle": "Skład w czasie",
         "categoryDistributionTitle": "Rozkład kategorii",
         "passRateTitle": "Wskaźnik zaliczenia w czasie",
+        "healthyRateTitle": "Odsetek zdrowych w czasie",
+        "trueRateTitle": "Odsetek prawdziwych w czasie",
         "trueFalseTitle": "Prawda vs Fałsz",
         "legendAvg": "Śr",
         "legendP95": "p95",
         "legendThreshold": "próg {direction} {value}",
         "legendHealthy": "zdrowy",
         "legendUnhealthy": "niezdrowy",
+        "legendHealthyRate": "Odsetek zdrowych",
+        "legendTrueRate": "Odsetek prawdziwych",
+        "legendTrueCount": "prawda ({count})",
+        "legendFalseCount": "fałsz ({count})",
         "kpis": {
           "average": "Średnia",
           "p50": "P50",
@@ -7938,11 +7962,49 @@
           "p50p95": "P50 / P95",
           "unhealthy": "Niezdrowy",
           "healthy": "Zdrowy",
-          "coverage": "Pokrycie"
+          "trueRate": "Odsetek prawdziwych",
+          "falseRate": "Odsetek fałszywych",
+          "coverage": "Pokrycie",
+          "targetsScored": "Ocenione cele"
+        },
+        "health": {
+          "title": "Stan zdrowia",
+          "noThreshold": "Nie skonfigurowano progu zdrowego. Ocen nie można jeszcze klasyfikować jako zdrowe lub pogarszające się.",
+          "thresholdOnly": "Zdrowy jeśli {threshold}",
+          "summary": "{percent}% poniżej progu · Zdrowy jeśli {threshold}"
+        }
+      },
+      "runs": {
+        "title": "Oceny ewaluacyjne",
+        "hint": "Oceny i uzasadnienia pochodzą z _llm_scores. Wybierz uruchomienie, aby otworzyć jego ślad ewaluatora w celu dalszego zbadania.",
+        "filterLabel": "Filtruj oceny ewaluacyjne",
+        "footerTitle": "Oceny ewaluacyjne",
+        "noThresholdHint": "Ustaw próg zdrowego stanu dla tej konfiguracji oceny, aby klasyfikować i podświetlać niezdrowe oceny.",
+        "noReasoning": "Brak zarejestrowanego uzasadnienia",
+        "unknownAgent": "Nieznany agent",
+        "unknownScope": "Nieznany zakres",
+        "queryError": "Nie można odświeżyć ocen ewaluacyjnych. Nadal wyświetlana jest ostatnia pomyślna strona.",
+        "empty": "Brak ocen ewaluacyjnych w tym przedziale czasowym.",
+        "emptyUnhealthy": "Brak niezdrowych ocen w tym przedziale czasowym.",
+        "filters": {
+          "all": "Wszystkie oceny",
+          "unhealthy": "Niezdrowe"
+        },
+        "health": {
+          "healthy": "Zdrowe",
+          "unhealthy": "Niezdrowe"
+        },
+        "columns": {
+          "time": "Ocenione",
+          "result": "Wynik",
+          "reasoning": "Uzasadnienie",
+          "target": "Cel",
+          "agent": "Agent"
         }
       },
       "sidebar": {
         "allConfigs": "Wszystkie konfiguracje",
+        "scoreCount": "{count} wyników",
         "empty": "Żadne konfiguracje nie pasują do tego filtra."
       },
       "overview": {
@@ -7959,13 +8021,30 @@
         "waitingPrimaryCta": "Otwórz zadania oceny",
         "waitingRefreshCta": "Odśwież",
         "noThreshold": "brak progu",
+        "relativeTime": {
+          "daysAgo": "{day} dni temu",
+          "monthsAgo": "{month} mies. temu"
+        },
+        "status": {
+          "healthy": "Zdrowy",
+          "unhealthy": "Wymaga uwagi",
+          "noThreshold": "Próg nie ustawiony",
+          "noData": "Brak danych wyników"
+        },
+        "health": {
+          "thresholdSummary": "{percent}% poniżej · Zdrowy, jeśli {threshold}",
+          "noThresholdHint": "Ustaw próg zdrowia",
+          "noDataHint": "Brak wyników w tym oknie"
+        },
         "columns": {
+          "health": "Zdrowie",
           "scoreConfig": "Konfiguracja ocen",
           "type": "Typ",
+          "quality": "Jakość",
           "totalScores": "Łączna liczba ocen",
-          "coverage": "Pokrycie",
+          "scopeMix": "Mieszanka zakresów",
           "unhealthy": "Niezdrowy",
-          "trend": "Trend",
+          "volumeTrend": "Trend wolumenu",
           "threshold": "Zdrowy, jeśli",
           "updated": "Zaktualizowano"
         }
@@ -7993,11 +8072,10 @@
     "buttons": {
       "cancel": "Anuluj",
       "close": "Zamknij",
-      "create": "Utwórz",
       "remove": "Usuń",
       "save": "Zapisz",
       "saveAsDraft": "Zapisz jako szkic",
-      "createAndActivate": "Utwórz i aktywuj"
+      "createAndActivate": "Zapisz & Aktywuj"
     },
     "scorerTypeDialog": {
       "title": "Utwórz nowego Scorer",
@@ -8081,8 +8159,7 @@
         "createdLabel": "Utworzono",
         "updatedLabel": "Zaktualizowano"
       },
-      "createTitle": "Utwórz konfigurację wyniku",
-      "editTitlePrefix": "Edytuj",
+      "createTitle": "Nowa konfiguracja wyników",
       "subtitle": "Wymiary miękkiego schematu wytwarzane przez Scorerów.",
       "eyebrow": "Konfiguracje wyników",
       "sectionTitle": "Konfiguracje wyników",
@@ -8091,8 +8168,6 @@
       "searchPlaceholder": "Konfiguracje wyszukiwania",
       "allTypes": "Wszystkie typy",
       "newButton": "Nowa konfiguracja wyników",
-      "saveButton": "Zapisz zmiany",
-      "createButton": "Utwórz",
       "columns": {
         "index": "#",
         "name": "Nazwa",
@@ -8297,14 +8372,13 @@
       "backTo": "Powrót do scorerów",
       "badgeRemote": "Zdalny",
       "badgeLlm": "LLM Judge",
-      "createTitleRemote": "Utwórz zdalny scorer",
-      "createTitleLlm": "Utwórz scorer LLM Judge",
-      "editTitleRemote": "Edytuj zdalny scorer",
-      "editTitleLlm": "Edytuj scorer LLM Judge",
+      "createTitleRemote": "Nowy zdalny oceniający",
+      "createTitleLlm": "Nowy oceniający LLM Judge",
+      "editTitleRemote": "Aktualizuj zdalnego oceniającego",
+      "editTitleLlm": "Aktualizuj oceniającego LLM Judge",
       "subtitleRemote": "Wywołaj punkt końcowy HTTP, który hostujesz. My przygotowujemy żądanie, ty zwracasz wynik.",
-      "subtitleLlm": "Model językowy ocenia każdy ślad za pomocą podanego przez ciebie promptu.",
+      "subtitleLlm": "Model językowy ocenia każdy cel oceny za pomocą dostarczonego promptu.",
       "descriptionPlaceholder": "Krótkie podsumowanie tego, co mierzy ten scorer.",
-      "producesScoreHelp": "Jaki wymiar mierzy ten scorer?",
       "providerHelp": "Wybierz dostawcę LLM, którego używa ten sędzia. Zarządzaj dostawcami w {settingsLink}.",
       "providerHelpSettingsLink": "Ustawienia",
       "refreshProviders": "Odśwież dostawców",
@@ -8317,8 +8391,49 @@
       "rangeLabel": "Zakres:",
       "healthyLabel": "Zdrowy:",
       "typeLabel": "Typ:",
-      "promptVariablesLabel": "Zmienne:",
-      "promptHelp": "Skup się na logice oceny. Użyj {inputVar} i {outputVar} jako symboli zastępczych.",
+      "promptVariablesLabel": "Zmienne w tym prompcie:",
+      "promptVariableGuide": {
+        "title": "Dostępne zmienne promptu",
+        "description": "Te zmienne mogą być używane w powyższym prompcie. Sposób wypełnienia każdej z nich zależy od tego, co ocenia zadanie Eval.",
+        "columns": {
+          "variable": "Zmienna promptu"
+        },
+        "scopes": {
+          "span": "Span",
+          "trace": "Trace",
+          "session": "Sesja"
+        },
+        "statuses": {
+          "jobMapped": "Mapuj w zadaniu Eval",
+          "systemProvided": "Dostarczane przez system",
+          "requiresSelector": "Dostarczane przez system · wymaga selektora spanów",
+          "selectorRequired": "Wymagany selektor spanów",
+          "unavailable": "Niedostępne"
+        },
+        "variables": {
+          "inputOutput": {
+            "span": "Mapuj te na pola spanu zawierające wejście i wyjście.",
+            "trace": "Wejście i wyjście z głównego spanu trace'a.",
+            "session": "Niedostępne — sesja nie ma pojedynczego wejścia ani wyjścia."
+          },
+          "statistics": {
+            "span": "Mapuj tę nazwę jak każdą inną zmienną oceniającego podczas oceny pojedynczego spanu.",
+            "trace": "Metryki trace'a: liczba spanów, czas trwania, wywołania LLM i narzędzi, błędy, tokeny i koszt.",
+            "session": "Metryki sesji: liczba trace'ów i tur, czas trwania i błędy."
+          },
+          "spans": {
+            "span": "Mapuj tę nazwę jak każdą inną zmienną oceniającego podczas oceny pojedynczego spanu.",
+            "trace": "Przefiltrowany podzbiór spanów trace'a, wybrany przez selektor spanów zadania Eval.",
+            "session": "Niedostępne dla sesji."
+          },
+          "steps": {
+            "span": "Mapuj tę nazwę jak każdą inną zmienną oceniającego podczas oceny pojedynczego spanu.",
+            "trace": "Spany w kolejności czasowej; środek jest zwijany, gdy trace jest bardzo długi.",
+            "session": "Trace'e w kolejności czasowej, reprezentowane jako tury rozmowy."
+          }
+        },
+        "indexDescription": "{spansVar} i {stepsVar} przychodzą jako tablice JSON. Odwołuj się do całej zmiennej — dostęp indeksowany jak {indexedVar} nie jest obsługiwany."
+      },
       "identitySection": "Tożsamość",
       "judgeSection": "Konfiguracja sędziego",
       "endpointSection": "Punkt końcowy",
@@ -8336,10 +8451,9 @@
       "modelPlaceholder": "gpt-4o",
       "promptLabel": "Monit oceniający",
       "includeReasoningLabel": "Uwzględnij uzasadnienie",
-      "includeReasoningHint": "LLM wyjaśnia swoją ocenę. Przechowywane w score.metadata.reasoning.",
-      "extraFieldsLabel": "Dodatkowe pola metadanych",
-      "extraFieldsOptional": "Opcjonalne",
-      "extraFieldsHint": "Dodaj pola, które LLM powinien wypisać wraz z oceną. Przechowywane w score.metadata do późniejszej analizy.",
+      "includeReasoningHint": "Sędzia wyjaśnia, dlaczego przyznał tę ocenę, zapisaną z każdym wynikiem.",
+      "extraFieldsLabel": "Dodatkowe pola metadanych (opcjonalne)",
+      "extraFieldsHint": "Poproś sędziego o zwrócenie dodatkowych wartości z każdą oceną — na przykład kategorii lub pewności.",
       "extraFields": {
         "colName": "Nazwa pola",
         "colType": "Typ",
@@ -8441,9 +8555,12 @@
         "eyebrow": "Zadanie oceny",
         "refresh": "Odśwież",
         "descriptionSection": "Opis",
-        "targetSection": "Cel",
+        "targetSection": "Cel ewaluacji",
         "streamLabel": "Strumień",
         "streamTypeLabel": "Typ strumienia",
+        "targetScopeLabel": "Oceń każdy",
+        "idleWindowLabel": "Okno bezczynności",
+        "maxAgeLabel": "Maksymalny wiek",
         "filterLabel": "Filtr",
         "filterEmpty": "Brak filtra — każdy span jest oceniany",
         "scorersSection": "Oceniacze",
@@ -8453,13 +8570,30 @@
         "scorerTypeRemote": "Zdalny",
         "producesPrefix": "Produkuje",
         "viewScorerHint": "Podgląd",
-        "inputMappingSection": "Mapowanie wejścia",
+        "inputMappingSection": "Zmienne promptu",
         "samplingSection": "Próbkowanie",
         "samplingModeLabel": "Tryb",
         "samplingValueLabel": "Wartość",
         "samplingAll": "Oceniaj każde dopasowanie",
         "samplingRate": "Losowa próbka według częstotliwości",
         "samplingCount": "Pierwsze N dopasowań",
+        "manualSection": "Ocena ręczna",
+        "manualHelp": "Kolejkuj skorerów tego zadania dla jednego konkretnego celu. Ręczne uruchomienia pomijają automatyczne próbkowanie i zapisują powód w metadanych oceny.",
+        "manualTargetIdLabel": "ID celu",
+        "manualSpanIdLabel": "ID spana",
+        "manualSpanIdPlaceholder": "span_id",
+        "manualTraceIdLabel": "ID śladu",
+        "manualTraceIdPlaceholder": "trace_id",
+        "manualSessionIdLabel": "ID sesji",
+        "manualSessionIdPlaceholder": "session_id",
+        "manualReasonLabel": "Powód",
+        "manualReasonPlaceholder": "Dlaczego ponownie uruchamiasz ten cel?",
+        "manualVariablesLabel": "JSON zmiennych",
+        "manualVariablesObjectError": "Zmienne muszą być obiektem JSON",
+        "manualTargetRequired": "ID celu jest wymagane",
+        "manualSubmit": "Uruchom ręczną ewaluację",
+        "manualSuccess": "Zakolejkowano {count} zadań ewaluacji",
+        "manualError": "Ręczna ewaluacja nie powiodła się",
         "metadataSection": "Metadane",
         "versionLabel": "Wersja",
         "pipelineLabel": "ID potoku",
@@ -8512,6 +8646,7 @@
         "name": "Nazwa",
         "status": "Status",
         "stream": "Strumień",
+        "targetScope": "Zakres",
         "scorers": "Oceniacze",
         "successRate": "Wskaźnik powodzenia",
         "created": "Utworzono",
@@ -8525,9 +8660,10 @@
         "chipSampling": "Kontrola próbkowania"
       },
       "descriptionPlaceholder": "Co monitoruje to zadanie?",
-      "samplingValueHelp": "JSON: rate to liczba 0-1, count to dodatnia liczba całkowita.",
-      "samplingValueAllHelp": "Nie dotyczy, gdy tryb to All — każde dopasowane zdarzenie będzie oceniane.",
-      "samplingHelp": "Zastosuj po filtrze. Kontroluje koszt — tylko dopasowane spany liczą się do wskaźnika.",
+      "samplingValueHelp": "Wprowadź wartość między 0 a 1.",
+      "samplingValuePreview": "Ocenia {percent}% dopasowanych celów.",
+      "samplingValueAllHelp": "Każdy dopasowany cel jest oceniany.",
+      "samplingHelp": "Uruchamiane po filtrowaniu, w celu kontroli kosztów.",
       "presets": {
         "label": "Szybkie ustawienia wstępne",
         "rootSpans": "Tylko spany główne",
@@ -8535,25 +8671,49 @@
         "toolCalls": "Wywołania narzędzi"
       },
       "backTo": "Powrót do zadań oceny",
-      "createTitle": "Utwórz zadanie oceny online",
-      "editTitle": "Edytuj zadanie oceny online",
+      "createTitle": "Nowe zadanie ewaluacji",
+      "editTitle": "Aktualizuj zadanie ewaluacji",
       "stepper": {
         "target": "Cel",
         "scorers": "Oceniacze",
         "mapping": "Mapowanie",
         "sampling": "Próbkowanie"
       },
-      "targetSection": "Cel",
+      "detailsSection": "Szczegóły",
+      "targetSection": "Cel ewaluacji",
+      "filteringSection": "Filtrowanie",
       "scorersSection": "Oceniacze i mapowanie",
       "nameLabel": "Nazwa",
       "namePlaceholder": "Monitor wierności produkcyjnej",
-      "streamLabel": "Strumień wejściowy",
-      "streamPlaceholder": "Wybierz nazwę strumienia",
+      "streamLabel": "Strumień",
+      "streamPlaceholder": "Wybierz strumień",
       "streamTypeLabel": "Typ strumienia",
       "streamTypePlaceholder": "ślady",
+      "targetScopeLabel": "Oceń każdy",
+      "targetScopes": {
+        "span": "Span",
+        "trace": "Trace",
+        "session": "Sesja"
+      },
+      "targetScopeHelp": {
+        "span": "Oceń każdy pasujący span niezależnie.",
+        "trace": "Oceń cały trace po zamknięciu okna ukończenia.",
+        "session": "Oceń sesję w obrębie trace'y po zamknięciu okna ukończenia."
+      },
+      "completionSection": "Kryteria ukończenia",
+      "completionHelp": {
+        "trace": "Trace jest oceniany, gdy tylko pierwszy z nich zostanie spełniony.",
+        "session": "Sesja jest oceniana, gdy tylko pierwszy z nich zostanie spełniony."
+      },
+      "idleWindowLabel": "Okno bezczynności (sekundy)",
+      "idleWindowHelp": "Oceniany po {duration} bez nowych spanów.",
+      "idleWindowHelpEmpty": "Oceniane, gdy nie ma nowych spanów.",
+      "maxAgeLabel": "Maksymalny wiek (sekundy)",
+      "maxAgeHelp": "Oceniane {duration} po pierwszym spanie.",
+      "maxAgeHelpEmpty": "Oceniane w ustalonym wieku, nawet jeśli spany wciąż nadchodzą.",
       "descriptionLabel": "Opis",
       "samplingModeLabel": "Tryb próbkowania",
-      "samplingValueLabel": "Wartość próbkowania JSON",
+      "samplingValueLabel": "Współczynnik próbkowania",
       "samplingModes": {
         "rate": "Wskaźnik",
         "all": "Wszystkie",
@@ -8561,7 +8721,11 @@
       },
       "scorerPicker": {
         "title": "Oceniacze",
-        "hint": "Wybierz jednego lub więcej oceniaczy do uruchomienia dla każdego dopasowanego spana.",
+        "hint": {
+          "span": "Wybierz jednego lub więcej scorerów do uruchomienia dla każdego pasującego spana.",
+          "trace": "Wybierz jednego lub więcej scorerów do uruchomienia dla każdej kwalifikującej się ścieżki.",
+          "session": "Wybierz jednego lub więcej scorerów do uruchomienia dla każdej kwalifikującej się sesji."
+        },
         "meta": "{type} · v{version}",
         "placeholder": "Wybierz oceniaczy",
         "searchPlaceholder": "Szukaj oceniaczy…",
@@ -8569,21 +8733,113 @@
       },
       "filter": {
         "title": "Warunek filtrowania",
-        "hint": "Tylko spany spełniające ten warunek przechodzą do próbkowania i oceniania."
+        "hint": {
+          "span": "Tylko spany spełniające ten warunek wchodzą do próbkowania i oceny.",
+          "trace": "Ścieżka wchodzi do próbkowania i oceny, jeśli którykolwiek z jej spanów spełnia ten warunek.",
+          "session": "Sesja wchodzi do próbkowania i oceny, jeśli którykolwiek z jej spanów spełnia ten warunek."
+        }
+      },
+      "selector": {
+        "title": "Które spany (opcjonalnie)",
+        "hint": {
+          "trace": "Pozostaw puste, aby uwzględnić każdy span w ścieżce."
+        }
+      },
+      "endSignal": {
+        "title": "Sygnał zakończenia (opcjonalnie)",
+        "hint": {
+          "trace": "Zdefiniuj warunek spana, który natychmiast zamyka ścieżkę, gdy dowolny span go spełnia.",
+          "session": "Zdefiniuj warunek spana, który natychmiast zamyka sesję, gdy dowolny span go spełnia."
+        }
       },
       "inputMapping": {
-        "title": "Mapowanie wejściowe",
-        "hint": "Odwzoruj pola spanów na zmienne szablonu każdego oceniającego.",
+        "title": "Zmienne promptu",
+        "hint": {
+          "span": "Przypisz każdą zmienną do pola spana, które dostarcza jej wartości.",
+          "trace": "Wartości ścieżki są wypełniane automatycznie. Przypisz wszystko inne do pola spana.",
+          "session": "Wartości sesji są wypełniane automatycznie. Przypisz wszystko inne do pola spana."
+        },
         "selectScorers": "Wybierz oceniających, aby skonfigurować ich mapowania.",
         "noVariables": "Ten oceniający nie ma zmiennych szablonu do mapowania.",
-        "variableCount": "{count} zmiennych"
+        "variableCount": "{count} zmiennych",
+        "systemProvided": {
+          "title": "Zmienne {scope}",
+          "description": "OpenObserve dostarcza te wartości z samego {scope}. Prompt scorera może ich używać bezpośrednio — nie jest wymagane mapowanie.",
+          "badge": "Dostarczone przez system",
+          "selectorRequired": "Wymagany selektor spanów",
+          "columns": {
+            "variable": "Zmienna promptu",
+            "source": "Źródło",
+            "description": "Dostarczona wartość"
+          },
+          "variables": {
+            "input": {
+              "trace": "Dane wejściowe z głównego spana ścieżki."
+            },
+            "output": {
+              "trace": "Dane wyjściowe z głównego spana ścieżki."
+            },
+            "statistics": {
+              "trace": "Metryki ścieżki: liczba spanów, czas trwania, wywołania LLM i narzędzi, błędy, tokeny i koszt.",
+              "session": "Metryki sesji: liczba ścieżek i tur, czas trwania i błędy."
+            },
+            "spans": {
+              "trace": "Przefiltrowany podzbiór spanów, wybrany przez selektor spanów zadania."
+            },
+            "steps": {
+              "trace": "Spany w porządku chronologicznym; środkowa część jest zwijana, gdy ścieżka jest bardzo długa.",
+              "session": "Ścieżki w porządku chronologicznym, przedstawione jako tury rozmowy."
+            }
+          }
+        }
+      },
+      "spanSelector": {
+        "select": "Wybierz selektor spanów",
+        "bindingHelp": "Ścieżki mogą zawierać setki spanów. Wybierz te, które ten scorer powinien analizować.",
+        "createForScorer": "Utwórz dla scorera",
+        "createForScorerTitle": "Utwórz selektor spanów dla tego scorera",
+        "editorTitle": "Selektor spanów",
+        "name": "Nazwa selektora",
+        "schemaMode": "Pola do odczytu",
+        "defaultSchema": "Standardowe pola GenAI",
+        "customSchema": "Pola niestandardowe",
+        "defaultSchemaHelp": "Te osiem pól jest odczytywanych z każdego pasującego spana. Brakujące dane są puste.",
+        "fields": "Pola",
+        "fieldsHelp": "Tylko te pola są odczytywane — nic więcej nie jest wysyłane do scorera.",
+        "maximumSpans": "Maksymalna liczba spanów",
+        "budget": "Ogranicza liczbę spanów wybranych ze ścieżki.",
+        "validation": {
+          "name": "Wprowadź nazwę selektora.",
+          "duplicateName": "Nazwy selektorów muszą być unikalne w tym zadaniu.",
+          "filter": "Uzupełnij lub usuń niedokończony warunek filtru.",
+          "fields": "Wybierz co najmniej jedno pole dla niestandardowego schematu.",
+          "maximumSpans": "Maksymalna liczba spanów musi być dodatnią liczbą całkowitą.",
+          "budget": "Zbyt wiele spanów dla wybranych pól. Zmniejsz liczbę spanów lub odczytaj mniej pól.",
+          "binding": "Wybierz Span Selector dla każdego punktatora."
+        }
       },
       "preview": {
-        "title": "Dopasowane spany",
-        "hint": "Po wybraniu strumienia i filtra, ten panel pokaże, ile spanów dopasuje twoje zadanie.",
-        "matchedSuffix": "dopasowanych spanów · ostatnie 24h",
+        "scopes": {
+          "span": {
+            "title": "Dopasowane spany",
+            "hint": "Po wybraniu strumienia i filtru, ten panel pokaże, ile spanów dopasuje twoje zadanie.",
+            "matchedSuffix": "dopasowane spany · ostatnie 24h",
+            "matchedLoading": "Zliczanie dopasowanych spanów…"
+          },
+          "trace": {
+            "title": "Dopasowane trace'y",
+            "hint": "Po wybraniu strumienia i filtru, ten panel pokaże, ile trace'y dopasuje twoje zadanie.",
+            "matchedSuffix": "dopasowane trace'y · ostatnie 24h",
+            "matchedLoading": "Zliczanie dopasowanych trace'y…"
+          },
+          "session": {
+            "title": "Dopasowane sesje",
+            "hint": "Po wybraniu strumienia i filtru, ten panel pokaże, ile sesji dopasuje twoje zadanie.",
+            "matchedSuffix": "dopasowane sesje · ostatnie 24h",
+            "matchedLoading": "Zliczanie dopasowanych sesji…"
+          }
+        },
         "matchedError": "Nie można załadować liczby dopasowań",
-        "matchedLoading": "Zliczanie dopasowanych spanów…",
         "matchedIncomplete": "Uzupełnij warunek filtrowania, aby zaktualizować liczbę.",
         "summaryTitle": "Podsumowanie",
         "summaryName": "Nazwa",
@@ -8600,6 +8856,7 @@
       "validation": {
         "nameRequired": "Nazwa zadania jest wymagana",
         "streamRequired": "Strumień jest wymagany",
+        "idleWindowMinimum": "Okno bezczynności musi wynosić co najmniej 45 sekund",
         "samplingValueRequired": "Wartość próbkowania jest wymagana"
       }
     }

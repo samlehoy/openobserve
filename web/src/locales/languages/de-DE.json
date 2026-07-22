@@ -7718,7 +7718,7 @@
       "sessions": "Agentensitzungen nacheinander durchsuchen und überprüfen",
       "agentGraph": "Sehen Sie, womit Ihre Agenten interagieren — Tools, Modelle, Dienste und Datenspeicher",
       "agentBehavior": "Erkennen Sie Agenten, die in Schleifen stecken, und die Fehler, die zum Scheitern führen.",
-      "quality": "Bewerte und verfolge die Qualität deiner LLM-Antworten",
+      "quality": "Bewertungsqualität über Span-, Trace- und Sitzungsbewertungen hinweg verfolgen",
       "evalJobs": "Führen Sie Evaluierungsaufträge in Ihren Sitzungen aus und überwachen Sie sie",
       "scorers": "Erstellen und verwalten Sie die Scorer, die LLM-Ergebnisse bewerten",
       "scoreConfigs": "Konfigurieren Sie die Bewertungsrubriken, die für Ihre Bewertungen verwendet werden"
@@ -7868,7 +7868,22 @@
     },
     "quality": {
       "scopeLabel": "Alle Qualitätsabmessungen in diesem Arbeitsbereich",
+      "agentLabel": "Agent",
       "agentPlaceholder": "Alle Agenten",
+      "kpisAriaLabel": "Tier-1-KPIs",
+      "dataTypes": {
+        "numericShort": "Anz.",
+        "categoricalShort": "Kat.",
+        "booleanShort": "Bool"
+      },
+      "scopes": {
+        "filterLabel": "Bewertungsumfang",
+        "filterHint": "Vergleichen Sie diese Bewertungskonfiguration über verschiedene Bewertungszielbereiche hinweg.",
+        "all": "Alle",
+        "span": "Span",
+        "trace": "Trace",
+        "session": "Sitzung"
+      },
       "timeRange": {
         "label": "Zeitbereich",
         "last1h": "Letzte 1 Stunde",
@@ -7882,20 +7897,20 @@
       },
       "refresh": "Auffrischen",
       "kpis": {
-        "evaluated": {
-          "title": "Bewertete Spuren",
+        "scoreResults": {
+          "title": "Bewertungsergebnisse",
           "unit": "",
-          "hint": "Eindeutige Trace-IDs in _llm_scores innerhalb des Fensters"
+          "hint": "Neueste Bewertungsergebnisse über Span-, Trace- und Sitzungsbewertungen im Fenster"
         },
         "evaluationCost": {
           "title": "Kosten der Bewertung",
           "unit": "$",
           "hint": "Summe der LLM Judge Scorer-Kosten im Fenster"
         },
-        "jobSuccess": {
-          "title": "Erfolg im Beruf",
+        "scorerSuccess": {
+          "title": "Bewertungserfolg",
           "unit": "%",
-          "hint": "Erfolgsquote bei der Ausführung von Online-Evaluationsaufträgen"
+          "hint": "Erfolgreiche Bewertungsaufrufe als Prozentsatz aller Bewertungsaufrufe"
         },
         "scorerFailures": {
           "title": "Torschützenausfälle",
@@ -7903,11 +7918,12 @@
           "hint": "Fehlgeschlagene Scorer-Aufrufe im Fenster"
         },
         "latencyP95": {
-          "title": "Latenz p95",
+          "title": "Bewertungslatenz p95",
           "unit": "s",
-          "hint": "Scorer-Call p95-Latenz"
+          "hint": "95. Perzentil der Bewertungsaufruf-Latenz"
         },
         "vsPrev": "gegen voriges",
+        "noPriorData": "keine vorherigen Daten",
         "noData": "—"
       },
       "loading": "Qualitätsdaten werden geladen...",
@@ -7916,7 +7932,9 @@
         "noData": "Noch keine Ergebnisse für diese Konfiguration in diesem Fenster.",
         "empty": {
           "title": "Warten auf Ihre ersten Scores",
-          "description": "Für diese Konfiguration sind im ausgewählten Zeitbereich keine Scores eingegangen. Sie erscheinen hier automatisch, sobald ein Scorer ausgeführt wird, der sie verwendet."
+          "titleScoped": "Keine {scope}-Bewertungen in diesem Fenster",
+          "description": "Für diese Konfiguration sind im ausgewählten Zeitbereich keine Scores eingegangen. Sie erscheinen hier automatisch, sobald ein Scorer ausgeführt wird, der sie verwendet.",
+          "descriptionScoped": "Für diese Konfiguration sind im ausgewählten Zeitraum keine {scope}-Bewertungen eingegangen. Wählen Sie einen anderen Bereich oder erweitern Sie den Zeitraum."
         },
         "drillTitle": "Auf Spuren bohren",
         "trendTitle": "Trend",
@@ -7925,12 +7943,18 @@
         "compositionTitle": "Zusammensetzung im Laufe der Zeit",
         "categoryDistributionTitle": "Kategorie Vertrieb",
         "passRateTitle": "Erfolgsquote im Laufe der Zeit",
+        "healthyRateTitle": "Gesundheitsrate im Zeitverlauf",
+        "trueRateTitle": "Wahrheitsrate im Zeitverlauf",
         "trueFalseTitle": "Wahr gegen Falsch",
         "legendAvg": "Durchschn.",
         "legendP95": "p95",
         "legendThreshold": "Schwellenwert {Richtung} {Wert}",
         "legendHealthy": "gesund",
         "legendUnhealthy": "ungesund",
+        "legendHealthyRate": "Gesundheitsrate",
+        "legendTrueRate": "Wahrheitsrate",
+        "legendTrueCount": "wahr ({count})",
+        "legendFalseCount": "falsch ({count})",
         "kpis": {
           "average": "Durchschnittlich",
           "p50": "P50",
@@ -7938,11 +7962,49 @@
           "p50p95": "P50/P95",
           "unhealthy": "Ungesund",
           "healthy": "Gesund",
-          "coverage": "Deckung"
+          "trueRate": "Wahrheitsrate",
+          "falseRate": "Falschrate",
+          "coverage": "Deckung",
+          "targetsScored": "Bewertete Ziele"
+        },
+        "health": {
+          "title": "Gesundheitsstatus",
+          "noThreshold": "Es ist kein gesunder Schwellenwert konfiguriert. Bewertungen können noch nicht als gesund oder sich verschlechternd eingestuft werden.",
+          "thresholdOnly": "Gesund, wenn {threshold}",
+          "summary": "{percent}% unter Schwellenwert · Gesund, wenn {threshold}"
+        }
+      },
+      "runs": {
+        "title": "Bewertungsergebnisse",
+        "hint": "Bewertungen und Begründungen stammen von _llm_scores. Wählen Sie einen Durchlauf aus, um dessen Evaluator-Trace zur weiteren Untersuchung zu öffnen.",
+        "filterLabel": "Bewertungsergebnisse filtern",
+        "footerTitle": "Bewertungsergebnisse",
+        "noThresholdHint": "Legen Sie einen gesunden Schwellenwert für diese Bewertungskonfiguration fest, um ungesunde Bewertungen zu klassifizieren und hervorzuheben.",
+        "noReasoning": "Keine Begründung aufgezeichnet",
+        "unknownAgent": "Unbekannter Agent",
+        "unknownScope": "Unbekannter Bereich",
+        "queryError": "Bewertungsergebnisse konnten nicht aktualisiert werden. Die letzte erfolgreiche Seite wird weiterhin angezeigt.",
+        "empty": "Keine Bewertungsergebnisse in diesem Zeitraum.",
+        "emptyUnhealthy": "Keine ungesunden Bewertungen in diesem Zeitraum.",
+        "filters": {
+          "all": "Alle Bewertungen",
+          "unhealthy": "Ungesund"
+        },
+        "health": {
+          "healthy": "Gesund",
+          "unhealthy": "Ungesund"
+        },
+        "columns": {
+          "time": "Bewertet",
+          "result": "Punktzahl",
+          "reasoning": "Begründung",
+          "target": "Ziel",
+          "agent": "Agent"
         }
       },
       "sidebar": {
         "allConfigs": "Alle Konfigurationen",
+        "scoreCount": "{count} Punktzahlen",
         "empty": "Keine Konfigurationen stimmen mit diesem Filter überein."
       },
       "overview": {
@@ -7959,13 +8021,30 @@
         "waitingPrimaryCta": "Öffnen Sie Eval Jobs",
         "waitingRefreshCta": "Auffrischen",
         "noThreshold": "kein Schwellenwert",
+        "relativeTime": {
+          "daysAgo": "vor {day} Tagen",
+          "monthsAgo": "vor {month} Monaten"
+        },
+        "status": {
+          "healthy": "Gesund",
+          "unhealthy": "Benötigt Aufmerksamkeit",
+          "noThreshold": "Schwellenwert nicht gesetzt",
+          "noData": "Keine Punktzahldaten"
+        },
+        "health": {
+          "thresholdSummary": "{percent}% darunter · Gesund, wenn {threshold}",
+          "noThresholdHint": "Gesunden Schwellenwert festlegen",
+          "noDataHint": "Keine Punktzahlen in diesem Zeitfenster"
+        },
         "columns": {
+          "health": "Gesundheit",
           "scoreConfig": "Punktekonfiguration",
           "type": "Typ",
+          "quality": "Qualität",
           "totalScores": "Gesamtpunktzahl",
-          "coverage": "Deckung",
+          "scopeMix": "Bereichsmischung",
           "unhealthy": "Ungesund",
-          "trend": "Trend",
+          "volumeTrend": "Volumentrend",
           "threshold": "Gesund wenn",
           "updated": "aktualisiert"
         }
@@ -7993,11 +8072,10 @@
     "buttons": {
       "cancel": "Stornieren",
       "close": "Schließen",
-      "create": "Erstellen",
       "remove": "Entfernen",
       "save": "Speichern",
       "saveAsDraft": "Als Entwurf speichern",
-      "createAndActivate": "Erstellen & aktivieren"
+      "createAndActivate": "Speichern & Aktivieren"
     },
     "scorerTypeDialog": {
       "title": "Einen neuen Scorer erstellen",
@@ -8081,8 +8159,7 @@
         "createdLabel": "Erstellt",
         "updatedLabel": "Aktualisiert"
       },
-      "createTitle": "Neue Score-Konfiguration",
-      "editTitlePrefix": "Bearbeiten",
+      "createTitle": "Neue Bewertungskonfiguration",
       "subtitle": "Score-Konfigurationen definieren den Punktetyp, Gesundheitsgrenzwerte und Kategorien.",
       "eyebrow": "Score-Konfigurationen",
       "sectionTitle": "Score-Konfigurationen",
@@ -8091,8 +8168,6 @@
       "searchPlaceholder": "Konfigurationen suchen",
       "allTypes": "Alle Typen",
       "newButton": "Neue Score-Konfiguration",
-      "saveButton": "Änderungen speichern",
-      "createButton": "Erstellen",
       "columns": {
         "index": "#",
         "name": "Name",
@@ -8297,14 +8372,13 @@
       "backTo": "Zurück zu Scorers",
       "badgeRemote": "Fernbedienung",
       "badgeLlm": "LLM-Richter",
-      "createTitleRemote": "Remote Scorer erstellen",
-      "createTitleLlm": "LLM Judge Scorer erstellen",
-      "editTitleRemote": "Remote Scorer bearbeiten",
-      "editTitleLlm": "LLM Judge Scorer bearbeiten",
+      "createTitleRemote": "Neuer Remote-Bewerter",
+      "createTitleLlm": "Neuer LLM-Bewerter",
+      "editTitleRemote": "Remote-Bewerter aktualisieren",
+      "editTitleLlm": "LLM-Bewerter aktualisieren",
       "subtitleRemote": "Rufen Sie einen HTTP-Endpunkt auf, den Sie hosten. Wir rendern die Anfrage; Sie geben eine Punktzahl zurück.",
-      "subtitleLlm": "Ein Sprachmodell bewertet jede Spur anhand der von Ihnen bereitgestellten Aufforderung.",
+      "subtitleLlm": "Ein Sprachmodell bewertet jedes Bewertungsziel anhand des von Ihnen bereitgestellten Prompts.",
       "descriptionPlaceholder": "Eine kurze Zusammenfassung dessen, was dieser Scorer misst.",
-      "producesScoreHelp": "Welche Dimension misst dieser Scorer?",
       "providerHelp": "Wählen Sie den LLM-Anbieter, den dieser Judge aufruft. Verwalten Sie Anbieter unter {settingsLink}.",
       "providerHelpSettingsLink": "Einstellungen",
       "refreshProviders": "Anbieter aktualisieren",
@@ -8317,8 +8391,49 @@
       "rangeLabel": "Bereich:",
       "healthyLabel": "Gesund:",
       "typeLabel": "Typ:",
-      "promptVariablesLabel": "Variablen:",
-      "promptHelp": "Konzentrieren Sie sich auf die Bewertungslogik. Verwenden Sie {inputVar} und {outputVar} als Platzhalter.",
+      "promptVariablesLabel": "Variablen in diesem Prompt:",
+      "promptVariableGuide": {
+        "title": "Verfügbare Prompt-Variablen",
+        "description": "Diese Variablen können im obigen Prompt verwendet werden. Wie jede einzelne ausgefüllt wird, hängt davon ab, was der Eval-Job bewertet.",
+        "columns": {
+          "variable": "Prompt-Variable"
+        },
+        "scopes": {
+          "span": "Span",
+          "trace": "Trace",
+          "session": "Sitzung"
+        },
+        "statuses": {
+          "jobMapped": "Zuordnung im Eval-Job",
+          "systemProvided": "Systembereitgestellt",
+          "requiresSelector": "Systembereitgestellt · erfordert Span-Selektor",
+          "selectorRequired": "Span-Selektor erforderlich",
+          "unavailable": "Nicht verfügbar"
+        },
+        "variables": {
+          "inputOutput": {
+            "span": "Ordnen Sie diese den Span-Feldern zu, die die Eingabe und Ausgabe enthalten.",
+            "trace": "Eingabe und Ausgabe aus dem Root-Span des Traces.",
+            "session": "Nicht verfügbar — eine Sitzung hat keine einzelne Eingabe oder Ausgabe."
+          },
+          "statistics": {
+            "span": "Ordnen Sie diesen Namen wie jede andere Bewertervariable zu, wenn Sie einen einzelnen Span bewerten.",
+            "trace": "Trace-Metriken: Span-Anzahl, Dauer, LLM- und Tool-Aufrufe, Fehler, Tokens und Kosten.",
+            "session": "Sitzungsmetriken: Trace- und Turn-Anzahl, Dauer und Fehler."
+          },
+          "spans": {
+            "span": "Ordnen Sie diesen Namen wie jede andere Bewertervariable zu, wenn Sie einen einzelnen Span bewerten.",
+            "trace": "Ein gefilterter Teilsatz der Spans des Traces, ausgewählt durch den Span-Selektor des Eval-Jobs.",
+            "session": "Nicht verfügbar für Sitzungen."
+          },
+          "steps": {
+            "span": "Ordnen Sie diesen Namen wie jede andere Bewertervariable zu, wenn Sie einen einzelnen Span bewerten.",
+            "trace": "Spans in zeitlicher Reihenfolge; die Mitte wird eingeklappt, wenn der Trace sehr lang ist.",
+            "session": "Traces in zeitlicher Reihenfolge, dargestellt als Gesprächswendungen."
+          }
+        },
+        "indexDescription": "{spansVar} und {stepsVar} kommen als JSON-Arrays. Verweisen Sie auf die gesamte Variable – der indizierte Zugriff wie {indexedVar} wird nicht unterstützt."
+      },
       "identitySection": "Identität",
       "judgeSection": "Konfiguration des Richters",
       "endpointSection": "Endpunkt",
@@ -8336,10 +8451,9 @@
       "modelPlaceholder": "gpt-4o",
       "promptLabel": "Aufforderung des Richters",
       "includeReasoningLabel": "Begründung einbeziehen",
-      "includeReasoningHint": "Das LLM erläutert seinen Score. Gespeichert in score.metadata.reasoning.",
-      "extraFieldsLabel": "Zusätzliche Metadatenfelder",
-      "extraFieldsOptional": "Optional",
-      "extraFieldsHint": "Fügen Sie Felder hinzu, die das LLM neben dem Score ausgeben soll. Gespeichert in score.metadata zur späteren Analyse.",
+      "includeReasoningHint": "Der Richter erklärt, warum er diese Bewertung gegeben hat, gespeichert bei jedem Ergebnis.",
+      "extraFieldsLabel": "Zusätzliche Metadatenfelder (optional)",
+      "extraFieldsHint": "Bitten Sie den Richter, bei jeder Bewertung zusätzliche Werte zurückzugeben – zum Beispiel eine Kategorie oder eine Konfidenz.",
       "extraFields": {
         "colName": "Feldname",
         "colType": "Typ",
@@ -8441,9 +8555,12 @@
         "eyebrow": "Bewertungsauftrag",
         "refresh": "Aktualisieren",
         "descriptionSection": "Beschreibung",
-        "targetSection": "Ziel",
+        "targetSection": "Evaluierungsziel",
         "streamLabel": "Stream",
         "streamTypeLabel": "Stream-Typ",
+        "targetScopeLabel": "Jedes evaluieren",
+        "idleWindowLabel": "Leerlauffenster",
+        "maxAgeLabel": "Maximales Alter",
         "filterLabel": "Filter",
         "filterEmpty": "Kein Filter – jeder Span wird bewertet",
         "scorersSection": "Scorer",
@@ -8453,13 +8570,30 @@
         "scorerTypeRemote": "Remote",
         "producesPrefix": "Erzeugt",
         "viewScorerHint": "Anzeigen",
-        "inputMappingSection": "Eingabezuordnung",
+        "inputMappingSection": "Prompt-Variablen",
         "samplingSection": "Stichprobenentnahme",
         "samplingModeLabel": "Modus",
         "samplingValueLabel": "Wert",
         "samplingAll": "Jede Übereinstimmung bewerten",
         "samplingRate": "Zufallsstichprobe nach Rate",
         "samplingCount": "Erste N Übereinstimmungen",
+        "manualSection": "Manuelle Evaluierung",
+        "manualHelp": "Stellen Sie die Bewerter dieses Auftrags für ein explizites Ziel in die Warteschlange. Manuelle Ausführungen umgehen die automatische Stichprobenziehung und zeichnen den Grund in den Bewertungsmetadaten auf.",
+        "manualTargetIdLabel": "Ziel-ID",
+        "manualSpanIdLabel": "Span-ID",
+        "manualSpanIdPlaceholder": "Span-ID",
+        "manualTraceIdLabel": "Trace-ID",
+        "manualTraceIdPlaceholder": "Trace-ID",
+        "manualSessionIdLabel": "Sitzungs-ID",
+        "manualSessionIdPlaceholder": "Sitzungs-ID",
+        "manualReasonLabel": "Grund",
+        "manualReasonPlaceholder": "Warum führen Sie dieses Ziel erneut aus?",
+        "manualVariablesLabel": "Variablen-JSON",
+        "manualVariablesObjectError": "Variablen müssen ein JSON-Objekt sein",
+        "manualTargetRequired": "Ziel-ID ist erforderlich",
+        "manualSubmit": "Manuelle Evaluierung ausführen",
+        "manualSuccess": "{count} Evaluierungsaufgabe(n) in die Warteschlange gestellt",
+        "manualError": "Manuelle Evaluierung fehlgeschlagen",
         "metadataSection": "Metadaten",
         "versionLabel": "Version",
         "pipelineLabel": "Pipeline-ID",
@@ -8512,6 +8646,7 @@
         "name": "Name",
         "status": "Status",
         "stream": "Stream",
+        "targetScope": "Bereich",
         "scorers": "Scorer",
         "successRate": "Erfolgsrate",
         "created": "Erstellt",
@@ -8525,9 +8660,10 @@
         "chipSampling": "Stichprobensteuerung"
       },
       "descriptionPlaceholder": "Was überwacht dieser Auftrag?",
-      "samplingValueHelp": "Geben Sie eine Rate zwischen 0 und 1 ein.",
-      "samplingValueAllHelp": "Nicht anwendbar, wenn der Modus „Alle“ ist – jedes übereinstimmende Ereignis wird bewertet.",
-      "samplingHelp": "Wird nach dem Filter angewendet. Steuert die Kosten – nur übereinstimmende Spans zählen für die Rate.",
+      "samplingValueHelp": "Geben Sie einen Wert zwischen 0 und 1 ein.",
+      "samplingValuePreview": "Bewertet {percent}% der übereinstimmenden Ziele.",
+      "samplingValueAllHelp": "Jedes übereinstimmende Ziel wird bewertet.",
+      "samplingHelp": "Wird nach dem Filtern ausgeführt, um Kosten zu kontrollieren.",
       "presets": {
         "label": "Schnellvorgaben",
         "rootSpans": "Nur Root-Spans",
@@ -8535,26 +8671,49 @@
         "toolCalls": "Tool-Aufrufe"
       },
       "backTo": "Zurück zu Eval Jobs",
-      "createTitle": "Online-Evaluierungsauftrag erstellen",
-      "editTitle": "Online-Evaluierungsauftrag bearbeiten",
+      "createTitle": "Neuer Evaluierungsauftrag",
+      "editTitle": "Evaluierungsauftrag aktualisieren",
       "stepper": {
         "target": "Ziel",
         "scorers": "Torschützen",
         "mapping": "Kartierung",
         "sampling": "Probenentnahme"
       },
-      "targetSection": "Ziel",
+      "detailsSection": "Details",
+      "targetSection": "Evaluierungsziel",
       "filteringSection": "Filterung",
       "scorersSection": "Punktezähler und Kartierung",
       "nameLabel": "Name",
       "namePlaceholder": "Überwachung der Produktionstreue",
-      "streamLabel": "Eingabestream",
-      "streamPlaceholder": "Standard",
+      "streamLabel": "Stream",
+      "streamPlaceholder": "Stream auswählen",
       "streamTypeLabel": "Stream-Typ",
       "streamTypePlaceholder": "Spuren",
+      "targetScopeLabel": "Jedes evaluieren",
+      "targetScopes": {
+        "span": "Span",
+        "trace": "Trace",
+        "session": "Sitzung"
+      },
+      "targetScopeHelp": {
+        "span": "Jeden übereinstimmenden Span unabhängig bewerten.",
+        "trace": "Einen gesamten Trace nach Schließen des Abschlussfensters bewerten.",
+        "session": "Eine Sitzung über mehrere Traces nach Schließen des Abschlussfensters bewerten."
+      },
+      "completionSection": "Abschlusskriterien",
+      "completionHelp": {
+        "trace": "Der Trace wird bewertet, sobald das erste dieser Kriterien erfüllt ist.",
+        "session": "Die Sitzung wird bewertet, sobald das erste dieser Kriterien erfüllt ist."
+      },
+      "idleWindowLabel": "Leerlauffenster (Sekunden)",
+      "idleWindowHelp": "Bewertet nach {duration} ohne neue Spans.",
+      "idleWindowHelpEmpty": "Bewertet, sobald keine neuen Spans mehr eingehen.",
+      "maxAgeLabel": "Maximales Alter (Sekunden)",
+      "maxAgeHelp": "Ausgewertet {duration} nach dem ersten Span.",
+      "maxAgeHelpEmpty": "Zu einem festen Zeitpunkt ausgewertet, auch wenn noch Spans eintreffen.",
       "descriptionLabel": "Beschreibung",
       "samplingModeLabel": "Sampling-Modus",
-      "samplingValueLabel": "Stichprobenrate",
+      "samplingValueLabel": "Sampling-Rate",
       "samplingModes": {
         "rate": "Bewerte",
         "all": "Alle",
@@ -8562,7 +8721,11 @@
       },
       "scorerPicker": {
         "title": "Torschützen",
-        "hint": "Wählen Sie einen oder mehrere Scorer aus, die für jeden passenden Zeitraum ausgeführt werden sollen.",
+        "hint": {
+          "span": "Wählen Sie einen oder mehrere Scorer aus, die für jeden passenden Span ausgeführt werden.",
+          "trace": "Wählen Sie einen oder mehrere Scorer aus, die für jede berechtigte Trace ausgeführt werden.",
+          "session": "Wählen Sie einen oder mehrere Scorer aus, die für jede berechtigte Sitzung ausgeführt werden."
+        },
         "meta": "{Typ} · v {Version}",
         "placeholder": "Scorer auswählen",
         "searchPlaceholder": "Scorer suchen…",
@@ -8570,21 +8733,113 @@
       },
       "filter": {
         "title": "Zustand des Filters",
-        "hint": "Nur Spannweiten, die diese Bedingung erfüllen, werden in die Stichprobe und Bewertung eingegeben."
+        "hint": {
+          "span": "Nur Spans, die dieser Bedingung entsprechen, gelangen in Sampling und Scoring.",
+          "trace": "Eine Trace gelangt in Sampling und Scoring, wenn einer ihrer Spans dieser Bedingung entspricht.",
+          "session": "Eine Sitzung gelangt in Sampling und Scoring, wenn einer ihrer Spans dieser Bedingung entspricht."
+        }
+      },
+      "selector": {
+        "title": "Welche Spans (optional)",
+        "hint": {
+          "trace": "Leer lassen, um jeden Span in der Trace einzuschließen."
+        }
+      },
+      "endSignal": {
+        "title": "Endsignal (optional)",
+        "hint": {
+          "trace": "Definieren Sie eine Span-Bedingung, die die Trace sofort schließt, wenn ein Span darauf zutrifft.",
+          "session": "Definieren Sie eine Span-Bedingung, die die Sitzung sofort schließt, wenn ein Span darauf zutrifft."
+        }
       },
       "inputMapping": {
-        "title": "Zuordnung der Eingaben",
-        "hint": "Ordnen Sie Span-Felder jeder Scorer-Vorlagenvariablen zu.",
+        "title": "Prompt-Variablen",
+        "hint": {
+          "span": "Ordnen Sie jede Variable dem Span-Feld zu, das ihren Wert liefert.",
+          "trace": "Trace-Werte werden automatisch ausgefüllt. Ordnen Sie alles andere einem Span-Feld zu.",
+          "session": "Sitzungswerte werden automatisch ausgefüllt. Ordnen Sie alles andere einem Span-Feld zu."
+        },
         "selectScorers": "Wählen Sie Scorer aus, um ihre Zuordnungen zu konfigurieren.",
         "noVariables": "Dieser Scorer hat keine zuzuordnenden Vorlagenvariablen.",
-        "variableCount": "{count} Variablen"
+        "variableCount": "{count} Variablen",
+        "systemProvided": {
+          "title": "{scope} Variablen",
+          "description": "OpenObserve liefert diese Werte aus dem {scope} selbst. Ein Scorer-Prompt kann sie direkt verwenden – keine Zuordnung erforderlich.",
+          "badge": "Vom System bereitgestellt",
+          "selectorRequired": "Span-Auswahl erforderlich",
+          "columns": {
+            "variable": "Prompt-Variable",
+            "source": "Quelle",
+            "description": "Gelieferter Wert"
+          },
+          "variables": {
+            "input": {
+              "trace": "Eingabe vom Root-Span der Trace."
+            },
+            "output": {
+              "trace": "Ausgabe vom Root-Span der Trace."
+            },
+            "statistics": {
+              "trace": "Trace-Metriken: Span-Anzahl, Dauer, LLM- und Tool-Aufrufe, Fehler, Token und Kosten.",
+              "session": "Sitzungsmetriken: Trace- und Turn-Anzahl, Dauer und Fehler."
+            },
+            "spans": {
+              "trace": "Eine gefilterte Teilmenge von Spans, ausgewählt durch den Span-Selector des Jobs."
+            },
+            "steps": {
+              "trace": "Spans in zeitlicher Reihenfolge; die Mitte wird bei sehr langen Traces gefaltet.",
+              "session": "Traces in zeitlicher Reihenfolge, dargestellt als Gesprächsrunden."
+            }
+          }
+        }
+      },
+      "spanSelector": {
+        "select": "Span-Selector auswählen",
+        "bindingHelp": "Traces können Hunderte von Spans haben. Wählen Sie die aus, die dieser Scorer betrachten soll.",
+        "createForScorer": "Für Scorer erstellen",
+        "createForScorerTitle": "Erstellen Sie einen Span-Selector für diesen Scorer",
+        "editorTitle": "Span-Selector",
+        "name": "Selector-Name",
+        "schemaMode": "Zu lesende Felder",
+        "defaultSchema": "Standard-GenAI-Felder",
+        "customSchema": "Benutzerdefinierte Felder",
+        "defaultSchemaHelp": "Diese acht Felder werden von jedem passenden Span gelesen. Fehlende Werte werden leer übergeben.",
+        "fields": "Felder",
+        "fieldsHelp": "Nur diese Felder werden gelesen – nichts Weiteres wird an den Scorer gesendet.",
+        "maximumSpans": "Maximale Spans",
+        "budget": "Begrenzt die Anzahl der aus der Trace ausgewählten Spans.",
+        "validation": {
+          "name": "Geben Sie einen Selector-Namen ein.",
+          "duplicateName": "Selector-Namen müssen in diesem Job eindeutig sein.",
+          "filter": "Vervollständigen oder entfernen Sie die unvollständige Filterbedingung.",
+          "fields": "Wählen Sie mindestens ein Feld für ein benutzerdefiniertes Schema aus.",
+          "maximumSpans": "Die maximale Anzahl von Spans muss eine positive ganze Zahl sein.",
+          "budget": "Zu viele Spans für die ausgewählten Felder. Reduzieren Sie die Anzahl der Spans oder lesen Sie weniger Felder.",
+          "binding": "Wählen Sie für jeden Bewerter einen Span-Selektor aus."
+        }
       },
       "preview": {
-        "title": "Vorschau",
-        "hint": "Verwenden Sie die Felder auf der linken Seite, um das Ziel der Produktionsbewertung zu definieren.",
-        "matchedSuffix": "Passende Spannweiten · letzte 24 Stunden",
+        "scopes": {
+          "span": {
+            "title": "Übereinstimmende Spans",
+            "hint": "Sobald Sie einen Stream und Filter ausgewählt haben, zeigt dieses Panel, wie viele Spans Ihr Auftrag abgleicht.",
+            "matchedSuffix": "Spans abgeglichen · letzte 24h",
+            "matchedLoading": "Übereinstimmende Spans werden gezählt…"
+          },
+          "trace": {
+            "title": "Übereinstimmende Traces",
+            "hint": "Sobald Sie einen Stream und Filter ausgewählt haben, zeigt dieses Panel, wie viele Traces Ihr Auftrag abgleicht.",
+            "matchedSuffix": "Traces abgeglichen · letzte 24h",
+            "matchedLoading": "Übereinstimmende Traces werden gezählt…"
+          },
+          "session": {
+            "title": "Übereinstimmende Sitzungen",
+            "hint": "Sobald Sie einen Stream und Filter ausgewählt haben, zeigt dieses Panel, wie viele Sitzungen Ihr Auftrag abgleicht.",
+            "matchedSuffix": "Sitzungen abgeglichen · letzte 24h",
+            "matchedLoading": "Übereinstimmende Sitzungen werden gezählt…"
+          }
+        },
         "matchedError": "Die Anzahl der Treffer konnte nicht geladen werden",
-        "matchedLoading": "Übereinstimmende Spannweiten werden gezählt...",
         "matchedIncomplete": "Schließen Sie die Filterbedingung ab, um die Anzahl zu aktualisieren.",
         "summaryTitle": "Zusammenfassung",
         "summaryName": "Name",
@@ -8601,6 +8856,7 @@
       "validation": {
         "nameRequired": "Job name is required",
         "streamRequired": "A stream is required",
+        "idleWindowMinimum": "Das Leerlauffenster muss mindestens 45 Sekunden betragen",
         "samplingValueRequired": "A sampling value is required"
       }
     }

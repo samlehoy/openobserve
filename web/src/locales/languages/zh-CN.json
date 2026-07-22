@@ -7718,7 +7718,7 @@
       "sessions": "依次浏览和检查代理会话",
       "agentGraph": "查看您的代理与工具、模型、服务和数据存储的交互",
       "agentBehavior": "发现陷入循环的代理以及导致它们失败的错误",
-      "quality": "对您的 LLM 回复进行评分和跟踪",
+      "quality": "跨跨度、追踪和会话评估跟踪评分质量",
       "evalJobs": "在会话中运行和监控评估作业",
       "scorers": "创建和管理对 LLM 输出进行评分的记分员",
       "scoreConfigs": "配置评估时使用的评分标准"
@@ -7868,7 +7868,22 @@
     },
     "quality": {
       "scopeLabel": "此工作空间中的所有质量维度",
+      "agentLabel": "代理",
       "agentPlaceholder": "所有代理",
+      "kpisAriaLabel": "一级KPI",
+      "dataTypes": {
+        "numericShort": "数值",
+        "categoricalShort": "类别",
+        "booleanShort": "布尔"
+      },
+      "scopes": {
+        "filterLabel": "评分范围",
+        "filterHint": "跨评估目标范围比较此评分配置。",
+        "all": "全部",
+        "span": "跨度",
+        "trace": "追踪",
+        "session": "会话"
+      },
       "timeRange": {
         "label": "时间范围",
         "last1h": "过去 1 小时",
@@ -7882,20 +7897,20 @@
       },
       "refresh": "刷新",
       "kpis": {
-        "evaluated": {
-          "title": "评估过的追踪",
+        "scoreResults": {
+          "title": "评分结果",
           "unit": "",
-          "hint": "窗口中 _llm_scores 中的不同跟踪 ID"
+          "hint": "窗口内跨跨度、追踪和会话评估的最新评分结果"
         },
         "evaluationCost": {
           "title": "评估成本",
           "unit": "$",
           "hint": "窗口中 LLM Judge 评分器成本的总和"
         },
-        "jobSuccess": {
-          "title": "工作成功",
+        "scorerSuccess": {
+          "title": "评分器成功率",
           "unit": "%",
-          "hint": "在线评测任务运行成功率"
+          "hint": "成功评分器调用占所有评分器调用的百分比"
         },
         "scorerFailures": {
           "title": "记分手失败",
@@ -7903,11 +7918,12 @@
           "hint": "窗口中的评分器调用失败"
         },
         "latencyP95": {
-          "title": "延迟 p95",
+          "title": "评分器延迟p95",
           "unit": "s",
-          "hint": "Scorer-call p95 延迟"
+          "hint": "评分器调用延迟的第95百分位数"
         },
         "vsPrev": "vs 上一页",
+        "noPriorData": "无先前数据",
         "noData": "—"
       },
       "loading": "正在加载质量数据...",
@@ -7916,7 +7932,9 @@
         "noData": "此窗口中此配置尚无分数。",
         "empty": {
           "title": "正在等待您的首批评分",
-          "description": "在所选时间范围内，此配置尚无评分。一旦使用它的评分器运行，评分将自动显示在此处。"
+          "titleScoped": "此窗口中没有{scope}评分",
+          "description": "在所选时间范围内，此配置尚无评分。一旦使用它的评分器运行，评分将自动显示在此处。",
+          "descriptionScoped": "所选时间范围内此配置没有{scope}评分。请选择其他范围或扩大时间范围。"
         },
         "drillTitle": "钻到追踪",
         "trendTitle": "趋势",
@@ -7925,12 +7943,18 @@
         "compositionTitle": "随着时间的推移构成",
         "categoryDistributionTitle": "类别分布",
         "passRateTitle": "一段时间内的及格率",
+        "healthyRateTitle": "随时间变化的健康率",
+        "trueRateTitle": "随时间变化的真实率",
         "trueFalseTitle": "对与错",
         "legendAvg": "平均值",
         "legendP95": "p95",
         "legendThreshold": "阈值 {方向} {值}",
         "legendHealthy": "健康",
         "legendUnhealthy": "不健康",
+        "legendHealthyRate": "健康率",
+        "legendTrueRate": "真实率",
+        "legendTrueCount": "true ({count})",
+        "legendFalseCount": "false ({count})",
         "kpis": {
           "average": "平均值",
           "p50": "P50",
@@ -7938,11 +7962,49 @@
           "p50p95": "P50/P95",
           "unhealthy": "不健康",
           "healthy": "健康",
-          "coverage": "覆盖范围"
+          "trueRate": "真实率",
+          "falseRate": "假率",
+          "coverage": "覆盖范围",
+          "targetsScored": "已评分目标"
+        },
+        "health": {
+          "title": "健康状态",
+          "noThreshold": "未配置健康阈值。无法将评分分类为健康或降级。",
+          "thresholdOnly": "如果{threshold}则健康",
+          "summary": "{percent}%低于阈值 · 如果{threshold}则健康"
+        }
+      },
+      "runs": {
+        "title": "评估评分",
+        "hint": "评分和推理来自_llm_scores。选择一次运行以打开其评估器追踪进行进一步调查。",
+        "filterLabel": "过滤评估评分",
+        "footerTitle": "评估评分",
+        "noThresholdHint": "在此评分配置上设置健康阈值，以分类并突出显示不健康评分。",
+        "noReasoning": "未记录推理",
+        "unknownAgent": "未知代理",
+        "unknownScope": "未知范围",
+        "queryError": "无法刷新评估评分。仍显示上次成功的页面。",
+        "empty": "此时间范围内无评估评分。",
+        "emptyUnhealthy": "此时间范围内无不健康评分。",
+        "filters": {
+          "all": "所有评分",
+          "unhealthy": "不健康"
+        },
+        "health": {
+          "healthy": "健康",
+          "unhealthy": "不健康"
+        },
+        "columns": {
+          "time": "已评估",
+          "result": "分数",
+          "reasoning": "推理",
+          "target": "目标",
+          "agent": "智能体"
         }
       },
       "sidebar": {
         "allConfigs": "所有配置",
+        "scoreCount": "{count} 个分数",
         "empty": "没有与该过滤器匹配的配置。"
       },
       "overview": {
@@ -7959,13 +8021,30 @@
         "waitingPrimaryCta": "空缺评测任务",
         "waitingRefreshCta": "刷新",
         "noThreshold": "没有限制",
+        "relativeTime": {
+          "daysAgo": "{day}天前",
+          "monthsAgo": "{month}月前"
+        },
+        "status": {
+          "healthy": "健康",
+          "unhealthy": "需要注意",
+          "noThreshold": "未设置阈值",
+          "noData": "无分数数据"
+        },
+        "health": {
+          "thresholdSummary": "低于{percent}% · 如果{threshold}则健康",
+          "noThresholdHint": "设置健康阈值",
+          "noDataHint": "此窗口中无分数"
+        },
         "columns": {
+          "health": "健康度",
           "scoreConfig": "分数配置",
           "type": "类型",
+          "quality": "质量",
           "totalScores": "总分数",
-          "coverage": "覆盖范围",
+          "scopeMix": "范围混合",
           "unhealthy": "不健康",
-          "trend": "趋势",
+          "volumeTrend": "数量趋势",
           "threshold": "如果是健康的",
           "updated": "已更新"
         }
@@ -7993,11 +8072,10 @@
     "buttons": {
       "cancel": "取消",
       "close": "关闭",
-      "create": "创建",
       "remove": "移除",
       "save": "保存",
       "saveAsDraft": "保存为草稿",
-      "createAndActivate": "创建并激活"
+      "createAndActivate": "保存并激活"
     },
     "scorerTypeDialog": {
       "title": "创建新的评分器",
@@ -8081,8 +8159,7 @@
         "createdLabel": "创建于",
         "updatedLabel": "更新于"
       },
-      "createTitle": "新的分数配置",
-      "editTitlePrefix": "编辑",
+      "createTitle": "新分数配置",
       "subtitle": "分数配置定义分数类型、生命值阈值和类别。",
       "eyebrow": "评分配置",
       "sectionTitle": "评分配置",
@@ -8091,8 +8168,6 @@
       "searchPlaceholder": "搜索配置",
       "allTypes": "所有类型",
       "newButton": "新建评分配置",
-      "saveButton": "保存更改",
-      "createButton": "创建",
       "columns": {
         "index": "#",
         "name": "名称",
@@ -8297,14 +8372,13 @@
       "backTo": "返回评分器",
       "badgeRemote": "远程评分器",
       "badgeLlm": "LLM评分器",
-      "createTitleRemote": "创建远程评分器",
-      "createTitleLlm": "创建 LLM 评分器",
-      "editTitleRemote": "编辑远程评分器",
-      "editTitleLlm": "编辑 LLM 评分器",
+      "createTitleRemote": "新远程评分器",
+      "createTitleLlm": "新LLM评判评分器",
+      "editTitleRemote": "更新远程评分器",
+      "editTitleLlm": "更新LLM评判评分器",
       "subtitleRemote": "调用您托管的 HTTP 端点。我们提出请求；你返回一个分数。",
-      "subtitleLlm": "语言模型使用您提供的提示来判断每条轨迹。",
+      "subtitleLlm": "语言模型使用您提供的提示对每个评估目标进行评判。",
       "descriptionPlaceholder": "此评分器衡量内容的简短摘要。",
-      "producesScoreHelp": "此评分器衡量哪个维度？",
       "providerHelp": "选择此评判器调用的 LLM 提供商。在 {settingsLink} 中管理提供商。",
       "providerHelpSettingsLink": "设置",
       "refreshProviders": "刷新提供商",
@@ -8317,8 +8391,49 @@
       "rangeLabel": "范围：",
       "healthyLabel": "健康：",
       "typeLabel": "类型：",
-      "promptVariablesLabel": "变量：",
-      "promptHelp": "专注于评估逻辑。使用 {inputVar} 和 {outputVar} 作为占位符。",
+      "promptVariablesLabel": "此提示中的变量：",
+      "promptVariableGuide": {
+        "title": "可用提示变量",
+        "description": "这些变量可以在上面的提示中使用。每个变量的填充方式取决于评估作业评估的内容。",
+        "columns": {
+          "variable": "提示变量"
+        },
+        "scopes": {
+          "span": "跨度",
+          "trace": "跟踪",
+          "session": "会话"
+        },
+        "statuses": {
+          "jobMapped": "在评估作业中映射",
+          "systemProvided": "系统提供",
+          "requiresSelector": "系统提供 · 需要跨度选择器",
+          "selectorRequired": "需要跨度选择器",
+          "unavailable": "不可用"
+        },
+        "variables": {
+          "inputOutput": {
+            "span": "将这些映射到包含输入和输出的跨度字段。",
+            "trace": "来自跟踪根跨度的输入和输出。",
+            "session": "不可用——会话没有单一的输入或输出。"
+          },
+          "statistics": {
+            "span": "在评估单个跨度时，像其他评分器变量一样映射此名称。",
+            "trace": "跟踪指标：跨度计数、持续时间、LLM和工具调用、错误、令牌和成本。",
+            "session": "会话指标：跟踪和轮次计数、持续时间和错误。"
+          },
+          "spans": {
+            "span": "在评估单个跨度时，像其他评分器变量一样映射此名称。",
+            "trace": "跟踪跨度的过滤子集，由评估作业的跨度选择器选择。",
+            "session": "会话不可用。"
+          },
+          "steps": {
+            "span": "在评估单个跨度时，像其他评分器变量一样映射此名称。",
+            "trace": "按时间顺序的跨度；当跟踪很长时，中间部分会被折叠。",
+            "session": "按时间顺序的跟踪，表示为对话轮次。"
+          }
+        },
+        "indexDescription": "{spansVar} 和 {stepsVar} 以 JSON 数组形式到达。引用整个变量 — 不支持像 {indexedVar} 这样的索引访问。"
+      },
       "identitySection": "身份",
       "judgeSection": "LLM配置",
       "endpointSection": "网址",
@@ -8336,10 +8451,9 @@
       "modelPlaceholder": "gpt-4o",
       "promptLabel": "法官提示音",
       "includeReasoningLabel": "包含推理",
-      "includeReasoningHint": "LLM 解释其评分。存储在 score.metadata.reasoning 中。",
-      "extraFieldsLabel": "额外元数据字段",
-      "extraFieldsOptional": "可选",
-      "extraFieldsHint": "添加 LLM 应在评分旁输出的字段。存储在 score.metadata 中以供后续分析。",
+      "includeReasoningHint": "评判器解释其给出该分数的原因，该原因会随每个结果保存。",
+      "extraFieldsLabel": "额外元数据字段（可选）",
+      "extraFieldsHint": "要求评判器在每个评分中返回额外值 — 例如，类别或置信度。",
       "extraFields": {
         "colName": "字段名称",
         "colType": "类型",
@@ -8441,9 +8555,12 @@
         "eyebrow": "评估作业",
         "refresh": "刷新",
         "descriptionSection": "描述",
-        "targetSection": "目标",
+        "targetSection": "评估目标",
         "streamLabel": "流",
         "streamTypeLabel": "流类型",
+        "targetScopeLabel": "逐个评估",
+        "idleWindowLabel": "空闲窗口",
+        "maxAgeLabel": "最大时长",
         "filterLabel": "筛选器",
         "filterEmpty": "无筛选器 — 评估每个 span",
         "scorersSection": "评分器",
@@ -8453,13 +8570,30 @@
         "scorerTypeRemote": "远程",
         "producesPrefix": "产生",
         "viewScorerHint": "查看",
-        "inputMappingSection": "输入映射",
+        "inputMappingSection": "提示变量",
         "samplingSection": "采样",
         "samplingModeLabel": "模式",
         "samplingValueLabel": "值",
         "samplingAll": "评估每个匹配项",
         "samplingRate": "按比率随机采样",
         "samplingCount": "前 N 个匹配项",
+        "manualSection": "手动评估",
+        "manualHelp": "将此作业的评分器排队等待一个明确的目标。手动运行会绕过自动采样，并在评分元数据上记录原因。",
+        "manualTargetIdLabel": "目标 ID",
+        "manualSpanIdLabel": "Span ID",
+        "manualSpanIdPlaceholder": "span_id",
+        "manualTraceIdLabel": "Trace ID",
+        "manualTraceIdPlaceholder": "trace_id",
+        "manualSessionIdLabel": "Session ID",
+        "manualSessionIdPlaceholder": "session_id",
+        "manualReasonLabel": "原因",
+        "manualReasonPlaceholder": "为什么重新运行此目标？",
+        "manualVariablesLabel": "变量 JSON",
+        "manualVariablesObjectError": "变量必须是 JSON 对象",
+        "manualTargetRequired": "目标 ID 是必需的",
+        "manualSubmit": "运行手动评估",
+        "manualSuccess": "已排队 {count} 个评估任务",
+        "manualError": "手动评估失败",
         "metadataSection": "元数据",
         "versionLabel": "版本",
         "pipelineLabel": "管道 ID",
@@ -8512,6 +8646,7 @@
         "name": "名称",
         "status": "状态",
         "stream": "流",
+        "targetScope": "范围",
         "scorers": "评分器",
         "successRate": "成功率",
         "created": "创建于",
@@ -8525,9 +8660,10 @@
         "chipSampling": "采样控制"
       },
       "descriptionPlaceholder": "此作业监控什么？",
-      "samplingValueHelp": "请输入 0 到 1 之间的采样率。",
-      "samplingValueAllHelp": "当模式为“全部”时不适用 — 每个匹配的事件都将被评估。",
-      "samplingHelp": "在筛选器之后应用。控制成本 — 只有匹配的 span 计入比率。",
+      "samplingValueHelp": "输入 0 到 1 之间的比率。",
+      "samplingValuePreview": "评估 {percent}% 的匹配目标。",
+      "samplingValueAllHelp": "每个匹配目标都会被评估。",
+      "samplingHelp": "在过滤后运行，以控制成本。",
       "presets": {
         "label": "快速预设",
         "rootSpans": "仅根 span",
@@ -8535,23 +8671,46 @@
         "toolCalls": "工具调用"
       },
       "backTo": "返回评测任务",
-      "createTitle": "创建在线评测任务",
-      "editTitle": "编辑在线评测任务",
+      "createTitle": "新建评估作业",
+      "editTitle": "更新评估作业",
       "stepper": {
         "target": "目标",
         "scorers": "评分器",
         "mapping": "映射",
         "sampling": "采样"
       },
-      "targetSection": "目标",
+      "detailsSection": "详情",
+      "targetSection": "评估目标",
       "filteringSection": "筛选",
       "scorersSection": "评分器和制图",
       "nameLabel": "名称",
       "namePlaceholder": "任务名称",
-      "streamLabel": "数据流",
-      "streamPlaceholder": "默认",
+      "streamLabel": "流",
+      "streamPlaceholder": "选择流",
       "streamTypeLabel": "数据流类型",
       "streamTypePlaceholder": "追踪",
+      "targetScopeLabel": "逐个评估",
+      "targetScopes": {
+        "span": "Span",
+        "trace": "Trace",
+        "session": "Session"
+      },
+      "targetScopeHelp": {
+        "span": "独立评估每个匹配的 Span。",
+        "trace": "在完成窗口关闭后评估整个 Trace。",
+        "session": "在完成窗口关闭后跨 Trace 评估 Session。"
+      },
+      "completionSection": "完成条件",
+      "completionHelp": {
+        "trace": "一旦满足其中第一个条件，就会评估 Trace。",
+        "session": "一旦满足其中第一个条件，就会评估 Session。"
+      },
+      "idleWindowLabel": "空闲窗口（秒）",
+      "idleWindowHelp": "在 {duration} 内没有新 Span 后进行评估。",
+      "idleWindowHelpEmpty": "一旦没有新 Span 到达即进行评估。",
+      "maxAgeLabel": "最大年龄（秒）",
+      "maxAgeHelp": "在第一个跨度后评估 {duration}。",
+      "maxAgeHelpEmpty": "在固定年龄评估，即使跨度仍在到达。",
       "descriptionLabel": "描述",
       "samplingModeLabel": "采样模式",
       "samplingValueLabel": "采样率",
@@ -8562,7 +8721,11 @@
       },
       "scorerPicker": {
         "title": "评分器",
-        "hint": "选择一个或多个评分器在每个匹配的时间段内运行。",
+        "hint": {
+          "span": "为每个匹配的跨度选择一个或多个评分器运行。",
+          "trace": "为每个符合条件的追踪选择一个或多个评分器运行。",
+          "session": "为每个符合条件的会话选择一个或多个评分器运行。"
+        },
         "meta": "{类型} · v {版本}",
         "placeholder": "选择评分器",
         "searchPlaceholder": "搜索评分器…",
@@ -8570,21 +8733,113 @@
       },
       "filter": {
         "title": "过滤条件",
-        "hint": "只有符合此条件的跨度才能进入抽样和评分。"
+        "hint": {
+          "span": "只有匹配此条件的跨度进入采样和评分。",
+          "trace": "如果追踪的任何跨度匹配此条件，则追踪进入采样和评分。",
+          "session": "如果会话的任何跨度匹配此条件，则会话进入采样和评分。"
+        }
+      },
+      "selector": {
+        "title": "哪些跨度（可选）",
+        "hint": {
+          "trace": "留空以包含追踪中的所有跨度。"
+        }
+      },
+      "endSignal": {
+        "title": "结束信号（可选）",
+        "hint": {
+          "trace": "定义跨度条件，当任何跨度匹配时立即关闭追踪。",
+          "session": "定义跨度条件，当任何跨度匹配时立即关闭会话。"
+        }
       },
       "inputMapping": {
-        "title": "输入映射",
-        "hint": "将跨度字段映射到每个评分器模板变量中。",
+        "title": "提示变量",
+        "hint": {
+          "span": "将每个变量映射到提供其值的跨度字段。",
+          "trace": "追踪值自动填充。将其他内容映射到跨度字段。",
+          "session": "会话值自动填充。将其他内容映射到跨度字段。"
+        },
         "selectScorers": "选择评分器来配置他们的映射。",
         "noVariables": "此评分器没有模板变量可供映射。",
-        "variableCount": "{count} 变量"
+        "variableCount": "{count} 变量",
+        "systemProvided": {
+          "title": "{scope} 变量",
+          "description": "OpenObserve 从 {scope} 本身提供这些值。评分器提示可以直接使用它们 — 无需映射。",
+          "badge": "系统提供",
+          "selectorRequired": "需要跨度选择器",
+          "columns": {
+            "variable": "提示变量",
+            "source": "来源",
+            "description": "提供的值"
+          },
+          "variables": {
+            "input": {
+              "trace": "来自追踪根跨度的输入。"
+            },
+            "output": {
+              "trace": "来自追踪根跨度的输出。"
+            },
+            "statistics": {
+              "trace": "追踪指标：跨度计数、持续时间、LLM 和工具调用、错误、令牌和成本。",
+              "session": "会话指标：追踪和轮次计数、持续时间和错误。"
+            },
+            "spans": {
+              "trace": "由任务的跨度选择器选择的跨度的过滤子集。"
+            },
+            "steps": {
+              "trace": "按时间顺序排列的跨度；当追踪很长时，中间部分被折叠。",
+              "session": "按时间顺序排列的追踪，表示为对话轮次。"
+            }
+          }
+        }
+      },
+      "spanSelector": {
+        "select": "选择跨度选择器",
+        "bindingHelp": "追踪可能有数百个跨度。选择此评分器应查看的跨度。",
+        "createForScorer": "为评分器创建",
+        "createForScorerTitle": "为此评分器创建跨度选择器",
+        "editorTitle": "跨度选择器",
+        "name": "选择器名称",
+        "schemaMode": "要读取的字段",
+        "defaultSchema": "标准 GenAI 字段",
+        "customSchema": "自定义字段",
+        "defaultSchemaHelp": "这些八个字段从每个匹配的跨度中读取。任何缺失的内容都将为空。",
+        "fields": "字段",
+        "fieldsHelp": "只读取这些字段 — 其他内容不会发送给评分器。",
+        "maximumSpans": "最大跨度数",
+        "budget": "限制从追踪中选择的跨度数量。",
+        "validation": {
+          "name": "输入选择器名称。",
+          "duplicateName": "选择器名称在此任务中必须唯一。",
+          "filter": "完成或删除未完成的过滤条件。",
+          "fields": "请至少选择一个字段用于自定义架构。",
+          "maximumSpans": "最大跨度数必须为正整数。",
+          "budget": "选择的字段跨度太多。请减少跨度数，或读取更少的字段。",
+          "binding": "为每个评分器选择一个跨度选择器。"
+        }
       },
       "preview": {
-        "title": "预览",
-        "hint": "使用左边的字段定义生产评估目标。",
-        "matchedSuffix": "匹配的跨度·最近 24 小时",
+        "scopes": {
+          "span": {
+            "title": "匹配的跨度",
+            "hint": "一旦您选择了流和过滤器，此面板将显示您的任务将匹配多少个跨度。",
+            "matchedSuffix": "匹配的跨度 · 最近24小时",
+            "matchedLoading": "正在计算匹配的跨度…"
+          },
+          "trace": {
+            "title": "匹配的跟踪",
+            "hint": "一旦您选择了流和过滤器，此面板将显示您的任务将匹配多少个跟踪。",
+            "matchedSuffix": "匹配的跟踪 · 最近24小时",
+            "matchedLoading": "正在计算匹配的跟踪…"
+          },
+          "session": {
+            "title": "匹配的会话",
+            "hint": "一旦您选择了流和过滤器，此面板将显示您的任务将匹配多少个会话。",
+            "matchedSuffix": "匹配的会话 · 最近24小时",
+            "matchedLoading": "正在计算匹配的会话…"
+          }
+        },
         "matchedError": "无法加载比赛计数",
-        "matchedLoading": "正在计算匹配的跨度...",
         "matchedIncomplete": "完成筛选条件以更新计数。",
         "summaryTitle": "摘要",
         "summaryName": "名称",
@@ -8601,6 +8856,7 @@
       "validation": {
         "nameRequired": "Job name is required",
         "streamRequired": "A stream is required",
+        "idleWindowMinimum": "空闲窗口必须至少45秒。",
         "samplingValueRequired": "A sampling value is required"
       }
     }

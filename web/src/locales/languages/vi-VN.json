@@ -7718,7 +7718,7 @@
       "sessions": "Duyệt và kiểm tra các phiên tác nhân theo từng lượt",
       "agentGraph": "Xem tác nhân của bạn tương tác với gì — công cụ, mô hình, dịch vụ và kho dữ liệu",
       "agentBehavior": "Phát hiện các agent bị kẹt trong vòng lặp và lỗi khiến chúng thất bại",
-      "quality": "Chấm điểm và theo dõi chất lượng phản hồi LLM của bạn",
+      "quality": "Theo dõi chất lượng điểm số qua các đánh giá span, trace và session",
       "evalJobs": "Chạy và giám sát các công việc đánh giá trên các phiên của bạn",
       "scorers": "Tạo và quản lý các bộ chấm điểm đánh giá đầu ra LLM",
       "scoreConfigs": "Cấu hình các tiêu chí chấm điểm được sử dụng bởi các đánh giá của bạn"
@@ -7868,7 +7868,22 @@
     },
     "quality": {
       "scopeLabel": "Tất cả các khía cạnh chất lượng trong không gian làm việc này",
+      "agentLabel": "Tác nhân",
       "agentPlaceholder": "Tất cả tác nhân",
+      "kpisAriaLabel": "KPI cấp 1",
+      "dataTypes": {
+        "numericShort": "Số",
+        "categoricalShort": "Danh mục",
+        "booleanShort": "Bool"
+      },
+      "scopes": {
+        "filterLabel": "Phạm vi điểm số",
+        "filterHint": "So sánh Cấu hình Điểm này trên các phạm vi mục tiêu đánh giá.",
+        "all": "Tất cả",
+        "span": "Span",
+        "trace": "Trace",
+        "session": "Session"
+      },
       "timeRange": {
         "label": "Khoảng thời gian",
         "last1h": "1 giờ qua",
@@ -7882,20 +7897,20 @@
       },
       "refresh": "Làm mới",
       "kpis": {
-        "evaluated": {
-          "title": "Các span đã đánh giá",
+        "scoreResults": {
+          "title": "Kết quả Điểm số",
           "unit": "",
-          "hint": "Các ID span riêng biệt trong _llm_scores trong cửa sổ"
+          "hint": "Kết quả điểm số mới nhất qua các đánh giá span, trace và session trong cửa sổ"
         },
         "evaluationCost": {
           "title": "Chi phí đánh giá",
           "unit": "$",
           "hint": "Tổng chi phí bộ chấm điểm LLM Judge trong cửa sổ"
         },
-        "jobSuccess": {
-          "title": "Thành công công việc",
+        "scorerSuccess": {
+          "title": "Tỷ lệ thành công của Scorer",
           "unit": "%",
-          "hint": "Tỷ lệ thành công chạy công việc đánh giá trực tuyến"
+          "hint": "Số lần gọi scorer thành công tính theo phần trăm tổng số lần gọi scorer"
         },
         "scorerFailures": {
           "title": "Lỗi bộ chấm điểm",
@@ -7903,11 +7918,12 @@
           "hint": "Số lần gọi bộ chấm điểm thất bại trong cửa sổ"
         },
         "latencyP95": {
-          "title": "Độ trễ p95",
+          "title": "Độ trễ Scorer p95",
           "unit": "s",
-          "hint": "Độ trễ p95 của cuộc gọi bộ chấm điểm"
+          "hint": "Độ trễ gọi scorer ở phân vị thứ 95"
         },
         "vsPrev": "so với trước",
+        "noPriorData": "không có dữ liệu trước đó",
         "noData": "—"
       },
       "loading": "Đang tải dữ liệu chất lượng…",
@@ -7916,7 +7932,9 @@
         "noData": "Chưa có điểm nào cho cấu hình này trong cửa sổ này.",
         "empty": {
           "title": "Đang chờ điểm đầu tiên của bạn",
-          "description": "Không có điểm nào được ghi cho cấu hình này trong khoảng thời gian đã chọn. Chúng sẽ tự động xuất hiện khi bộ chấm điểm sử dụng nó chạy."
+          "titleScoped": "Không có điểm {scope} nào trong cửa sổ này",
+          "description": "Không có điểm nào được ghi cho cấu hình này trong khoảng thời gian đã chọn. Chúng sẽ tự động xuất hiện khi bộ chấm điểm sử dụng nó chạy.",
+          "descriptionScoped": "Không có điểm {scope} nào cho cấu hình này trong khoảng thời gian đã chọn. Hãy chọn phạm vi khác hoặc mở rộng khoảng thời gian."
         },
         "drillTitle": "Khoan đến traces",
         "trendTitle": "Xu hướng",
@@ -7925,12 +7943,18 @@
         "compositionTitle": "Thành phần theo thời gian",
         "categoryDistributionTitle": "Phân bố danh mục",
         "passRateTitle": "Tỷ lệ đạt theo thời gian",
+        "healthyRateTitle": "Tỷ lệ khỏe mạnh theo thời gian",
+        "trueRateTitle": "Tỷ lệ đúng theo thời gian",
         "trueFalseTitle": "Đúng vs Sai",
         "legendAvg": "TB",
         "legendP95": "p95",
         "legendThreshold": "ngưỡng {direction} {value}",
         "legendHealthy": "khỏe mạnh",
         "legendUnhealthy": "không khỏe mạnh",
+        "legendHealthyRate": "Tỷ lệ khỏe mạnh",
+        "legendTrueRate": "Tỷ lệ đúng",
+        "legendTrueCount": "đúng ({count})",
+        "legendFalseCount": "sai ({count})",
         "kpis": {
           "average": "Trung bình",
           "p50": "P50",
@@ -7938,11 +7962,49 @@
           "p50p95": "P50 / P95",
           "unhealthy": "Không khỏe mạnh",
           "healthy": "Khỏe mạnh",
-          "coverage": "Phạm vi phủ sóng"
+          "trueRate": "Tỷ lệ đúng",
+          "falseRate": "Tỷ lệ sai",
+          "coverage": "Phạm vi phủ sóng",
+          "targetsScored": "Mục tiêu đã được chấm điểm"
+        },
+        "health": {
+          "title": "Trạng thái sức khỏe",
+          "noThreshold": "Chưa có ngưỡng khỏe mạnh nào được cấu hình. Điểm số chưa thể được phân loại là khỏe mạnh hoặc suy giảm.",
+          "thresholdOnly": "Khỏe mạnh nếu {threshold}",
+          "summary": "{percent}% dưới ngưỡng · Khỏe mạnh nếu {threshold}"
+        }
+      },
+      "runs": {
+        "title": "Điểm số đánh giá",
+        "hint": "Điểm số và lý do đến từ _llm_scores. Chọn một lần chạy để mở trace đánh giá của nó để điều tra thêm.",
+        "filterLabel": "Lọc điểm số đánh giá",
+        "footerTitle": "Điểm số Đánh giá",
+        "noThresholdHint": "Đặt ngưỡng khỏe mạnh cho Cấu hình Điểm này để phân loại và làm nổi bật điểm số không khỏe.",
+        "noReasoning": "Không có lý do nào được ghi lại",
+        "unknownAgent": "Tác nhân không xác định",
+        "unknownScope": "Phạm vi không xác định",
+        "queryError": "Không thể làm mới điểm số đánh giá. Trang thành công cuối cùng vẫn được hiển thị.",
+        "empty": "Không có điểm số đánh giá trong khoảng thời gian này.",
+        "emptyUnhealthy": "Không có điểm số không khỏe trong khoảng thời gian này.",
+        "filters": {
+          "all": "Tất cả điểm số",
+          "unhealthy": "Không khỏe mạnh"
+        },
+        "health": {
+          "healthy": "Khỏe mạnh",
+          "unhealthy": "Không khỏe mạnh"
+        },
+        "columns": {
+          "time": "Đã đánh giá",
+          "result": "Điểm",
+          "reasoning": "Lý do",
+          "target": "Mục tiêu",
+          "agent": "Tác nhân"
         }
       },
       "sidebar": {
         "allConfigs": "Tất cả cấu hình",
+        "scoreCount": "{count} điểm",
         "empty": "Không có cấu hình nào khớp với bộ lọc này."
       },
       "overview": {
@@ -7959,13 +8021,30 @@
         "waitingPrimaryCta": "Mở công việc đánh giá",
         "waitingRefreshCta": "Làm mới",
         "noThreshold": "không có ngưỡng",
+        "relativeTime": {
+          "daysAgo": "{day} ngày trước",
+          "monthsAgo": "{month} tháng trước"
+        },
+        "status": {
+          "healthy": "Khỏe mạnh",
+          "unhealthy": "Cần chú ý",
+          "noThreshold": "Chưa đặt ngưỡng",
+          "noData": "Không có dữ liệu điểm"
+        },
+        "health": {
+          "thresholdSummary": "{percent}% dưới · Khỏe mạnh nếu {threshold}",
+          "noThresholdHint": "Đặt ngưỡng khỏe mạnh",
+          "noDataHint": "Không có điểm trong cửa sổ này"
+        },
         "columns": {
+          "health": "Sức khỏe",
           "scoreConfig": "Cấu hình điểm",
           "type": "Loại",
+          "quality": "Chất lượng",
           "totalScores": "Tổng điểm",
-          "coverage": "Phạm vi phủ sóng",
+          "scopeMix": "Hỗn hợp phạm vi",
           "unhealthy": "Không khỏe mạnh",
-          "trend": "Xu hướng",
+          "volumeTrend": "Xu hướng khối lượng",
           "threshold": "Khỏe mạnh nếu",
           "updated": "Đã cập nhật"
         }
@@ -7993,11 +8072,10 @@
     "buttons": {
       "cancel": "Hủy",
       "close": "Đóng",
-      "create": "Tạo",
       "remove": "Xóa",
       "save": "Lưu",
       "saveAsDraft": "Lưu dưới dạng bản nháp",
-      "createAndActivate": "Tạo & Kích hoạt"
+      "createAndActivate": "Lưu & Kích hoạt"
     },
     "scorerTypeDialog": {
       "title": "Tạo bộ chấm điểm mới",
@@ -8081,8 +8159,7 @@
         "createdLabel": "Đã tạo",
         "updatedLabel": "Đã cập nhật"
       },
-      "createTitle": "Tạo cấu hình điểm",
-      "editTitlePrefix": "Chỉnh sửa",
+      "createTitle": "Cấu hình điểm mới",
       "subtitle": "Các chiều lược đồ mềm mà bộ chấm điểm tạo ra.",
       "eyebrow": "Cấu hình điểm",
       "sectionTitle": "Cấu hình điểm",
@@ -8091,8 +8168,6 @@
       "searchPlaceholder": "Tìm kiếm cấu hình",
       "allTypes": "Tất cả loại",
       "newButton": "Cấu hình điểm số mới",
-      "saveButton": "Lưu thay đổi",
-      "createButton": "Tạo",
       "columns": {
         "index": "#",
         "name": "Tên",
@@ -8297,14 +8372,13 @@
       "backTo": "Quay lại Bộ chấm điểm",
       "badgeRemote": "Remote",
       "badgeLlm": "LLM Judge",
-      "createTitleRemote": "Tạo Remote Scorer",
-      "createTitleLlm": "Tạo LLM Judge Scorer",
-      "editTitleRemote": "Chỉnh sửa Remote Scorer",
-      "editTitleLlm": "Chỉnh sửa LLM Judge Scorer",
+      "createTitleRemote": "Bộ chấm điểm từ xa mới",
+      "createTitleLlm": "Bộ chấm điểm LLM Judge mới",
+      "editTitleRemote": "Cập nhật bộ chấm điểm từ xa",
+      "editTitleLlm": "Cập nhật bộ chấm điểm LLM Judge",
       "subtitleRemote": "Gọi một endpoint HTTP bạn tự lưu trữ. Chúng tôi hiển thị yêu cầu, bạn trả về điểm số.",
-      "subtitleLlm": "Một mô hình ngôn ngữ đánh giá mỗi trace bằng prompt bạn cung cấp.",
+      "subtitleLlm": "Một mô hình ngôn ngữ đánh giá từng mục tiêu đánh giá bằng cách sử dụng lời nhắc bạn cung cấp.",
       "descriptionPlaceholder": "Một tóm tắt ngắn về những gì bộ chấm điểm này đo lường.",
-      "producesScoreHelp": "Bộ chấm điểm này đo lường khía cạnh nào?",
       "providerHelp": "Chọn Nhà cung cấp LLM mà trình đánh giá này gọi. Quản lý nhà cung cấp trong {settingsLink}.",
       "providerHelpSettingsLink": "Cài đặt",
       "refreshProviders": "Làm mới Nhà cung cấp",
@@ -8317,8 +8391,49 @@
       "rangeLabel": "Phạm vi:",
       "healthyLabel": "Khỏe mạnh:",
       "typeLabel": "Loại:",
-      "promptVariablesLabel": "Biến:",
-      "promptHelp": "Tập trung vào logic đánh giá. Sử dụng {inputVar} và {outputVar} làm trình giữ chỗ.",
+      "promptVariablesLabel": "Các biến trong lời nhắc này:",
+      "promptVariableGuide": {
+        "title": "Các biến lời nhắc có sẵn",
+        "description": "Các biến này có thể được sử dụng trong lời nhắc ở trên. Cách mỗi biến được điền phụ thuộc vào những gì công việc đánh giá (Eval Job) đánh giá.",
+        "columns": {
+          "variable": "Biến lời nhắc"
+        },
+        "scopes": {
+          "span": "Span",
+          "trace": "Trace",
+          "session": "Phiên"
+        },
+        "statuses": {
+          "jobMapped": "Ánh xạ trong công việc đánh giá",
+          "systemProvided": "Hệ thống cung cấp",
+          "requiresSelector": "Hệ thống cung cấp · yêu cầu Span Selector",
+          "selectorRequired": "Yêu cầu Span Selector",
+          "unavailable": "Không có sẵn"
+        },
+        "variables": {
+          "inputOutput": {
+            "span": "Ánh xạ chúng đến các trường span chứa đầu vào và đầu ra.",
+            "trace": "Đầu vào và đầu ra từ span gốc của trace.",
+            "session": "Không có sẵn — một phiên không có đầu vào hoặc đầu ra duy nhất."
+          },
+          "statistics": {
+            "span": "Ánh xạ tên này như bất kỳ biến chấm điểm nào khác khi đánh giá một span duy nhất.",
+            "trace": "Chỉ số trace: số lượng span, thời lượng, cuộc gọi LLM và công cụ, lỗi, token và chi phí.",
+            "session": "Chỉ số phiên: số lượng trace và lượt, thời lượng và lỗi."
+          },
+          "spans": {
+            "span": "Ánh xạ tên này như bất kỳ biến chấm điểm nào khác khi đánh giá một span duy nhất.",
+            "trace": "Một tập con đã lọc của các span của trace, được chọn bởi Span Selector của công việc đánh giá.",
+            "session": "Không có sẵn cho phiên."
+          },
+          "steps": {
+            "span": "Ánh xạ tên này như bất kỳ biến chấm điểm nào khác khi đánh giá một span duy nhất.",
+            "trace": "Các span theo thứ tự thời gian; phần giữa được gấp lại khi trace quá dài.",
+            "session": "Các trace theo thứ tự thời gian, được biểu diễn dưới dạng lượt hội thoại."
+          }
+        },
+        "indexDescription": "{spansVar} và {stepsVar} đến dưới dạng mảng JSON. Tham chiếu toàn bộ biến — truy cập theo chỉ mục như {indexedVar} không được hỗ trợ."
+      },
       "identitySection": "Identity",
       "judgeSection": "Cấu hình trình đánh giá",
       "endpointSection": "Điểm cuối",
@@ -8336,10 +8451,9 @@
       "modelPlaceholder": "gpt-4o",
       "promptLabel": "Lời nhắc của người đánh giá",
       "includeReasoningLabel": "Bao gồm lý luận",
-      "includeReasoningHint": "LLM giải thích điểm số của nó. Được lưu trong score.metadata.reasoning.",
-      "extraFieldsLabel": "Trường siêu dữ liệu bổ sung",
-      "extraFieldsOptional": "Tùy chọn",
-      "extraFieldsHint": "Thêm các trường mà LLM nên xuất ra cùng với điểm số. Được lưu trong score.metadata để phân tích sau.",
+      "includeReasoningHint": "Người đánh giá giải thích lý do đưa ra điểm số đó, được lưu cùng với mỗi kết quả.",
+      "extraFieldsLabel": "Trường Siêu Dữ Liệu Bổ Sung (Tùy chọn)",
+      "extraFieldsHint": "Yêu cầu người đánh giá trả về các giá trị bổ sung cùng với mỗi điểm số — ví dụ như một danh mục hoặc độ tin cậy.",
       "extraFields": {
         "colName": "Tên trường",
         "colType": "Loại",
@@ -8441,9 +8555,12 @@
         "eyebrow": "Công việc đánh giá",
         "refresh": "Làm mới",
         "descriptionSection": "Mô tả",
-        "targetSection": "Mục tiêu",
+        "targetSection": "Mục tiêu Đánh giá",
         "streamLabel": "Luồng",
         "streamTypeLabel": "Loại luồng",
+        "targetScopeLabel": "Đánh giá Mỗi",
+        "idleWindowLabel": "Cửa sổ Không hoạt động",
+        "maxAgeLabel": "Tuổi tối đa",
         "filterLabel": "Bộ lọc",
         "filterEmpty": "Không bộ lọc — mọi span đều được đánh giá",
         "scorersSection": "Bộ chấm điểm",
@@ -8453,13 +8570,30 @@
         "scorerTypeRemote": "Từ xa",
         "producesPrefix": "Tạo ra",
         "viewScorerHint": "Xem",
-        "inputMappingSection": "Ánh xạ đầu vào",
+        "inputMappingSection": "Biến Prompt",
         "samplingSection": "Lấy mẫu",
         "samplingModeLabel": "Chế độ",
         "samplingValueLabel": "Giá trị",
         "samplingAll": "Đánh giá mọi kết quả khớp",
         "samplingRate": "Lấy mẫu ngẫu nhiên theo tỷ lệ",
         "samplingCount": "N kết quả khớp đầu tiên",
+        "manualSection": "Đánh giá Thủ công",
+        "manualHelp": "Xếp hàng các bộ chấm điểm của công việc này cho một mục tiêu cụ thể. Các lần chạy thủ công bỏ qua lấy mẫu tự động và ghi lý do vào siêu dữ liệu điểm số.",
+        "manualTargetIdLabel": "ID Mục tiêu",
+        "manualSpanIdLabel": "ID Span",
+        "manualSpanIdPlaceholder": "span_id",
+        "manualTraceIdLabel": "ID Trace",
+        "manualTraceIdPlaceholder": "trace_id",
+        "manualSessionIdLabel": "ID Phiên",
+        "manualSessionIdPlaceholder": "session_id",
+        "manualReasonLabel": "Lý do",
+        "manualReasonPlaceholder": "Tại sao bạn chạy lại mục tiêu này?",
+        "manualVariablesLabel": "Biến JSON",
+        "manualVariablesObjectError": "Biến phải là một đối tượng JSON",
+        "manualTargetRequired": "ID Mục tiêu là bắt buộc",
+        "manualSubmit": "Chạy Đánh giá Thủ công",
+        "manualSuccess": "Đã xếp hàng {count} nhiệm vụ đánh giá",
+        "manualError": "Đánh giá thủ công thất bại",
         "metadataSection": "Siêu dữ liệu",
         "versionLabel": "Phiên bản",
         "pipelineLabel": "ID pipeline",
@@ -8512,6 +8646,7 @@
         "name": "Tên",
         "status": "Trạng thái",
         "stream": "Luồng",
+        "targetScope": "Phạm vi",
         "scorers": "Bộ chấm điểm",
         "successRate": "Tỷ lệ thành công",
         "created": "Đã tạo",
@@ -8525,9 +8660,10 @@
         "chipSampling": "Kiểm soát lấy mẫu"
       },
       "descriptionPlaceholder": "Tác vụ này giám sát điều gì?",
-      "samplingValueHelp": "JSON: rate là số từ 0-1, count là số nguyên dương.",
-      "samplingValueAllHelp": "Không áp dụng khi chế độ là Tất cả — mọi sự kiện khớp sẽ được đánh giá.",
-      "samplingHelp": "Áp dụng sau Bộ lọc. Kiểm soát chi phí — chỉ các span khớp mới được tính vào tỷ lệ.",
+      "samplingValueHelp": "Nhập một tỷ lệ từ 0 đến 1.",
+      "samplingValuePreview": "Đánh giá {percent}% các mục tiêu khớp.",
+      "samplingValueAllHelp": "Mọi mục tiêu khớp đều được đánh giá.",
+      "samplingHelp": "Chạy sau khi lọc, để kiểm soát chi phí.",
       "presets": {
         "label": "Cài đặt trước nhanh",
         "rootSpans": "Chỉ span gốc",
@@ -8535,25 +8671,49 @@
         "toolCalls": "Cuộc gọi công cụ"
       },
       "backTo": "Quay lại Tác vụ đánh giá",
-      "createTitle": "Tạo tác vụ đánh giá trực tuyến",
-      "editTitle": "Chỉnh sửa tác vụ đánh giá trực tuyến",
+      "createTitle": "Công việc Đánh giá Mới",
+      "editTitle": "Cập nhật Công việc Đánh giá",
       "stepper": {
         "target": "Mục tiêu",
         "scorers": "Bộ chấm điểm",
         "mapping": "Ánh xạ",
         "sampling": "Lấy mẫu"
       },
-      "targetSection": "Mục tiêu",
+      "detailsSection": "Chi tiết",
+      "targetSection": "Mục tiêu Đánh giá",
+      "filteringSection": "Lọc",
       "scorersSection": "Bộ chấm điểm và ánh xạ",
       "nameLabel": "Tên",
       "namePlaceholder": "Production Faithfulness Monitor",
-      "streamLabel": "Luồng đầu vào",
-      "streamPlaceholder": "Chọn tên luồng",
+      "streamLabel": "Luồng",
+      "streamPlaceholder": "Chọn Luồng",
       "streamTypeLabel": "Loại luồng",
       "streamTypePlaceholder": "traces",
+      "targetScopeLabel": "Đánh giá Mỗi",
+      "targetScopes": {
+        "span": "Span",
+        "trace": "Trace",
+        "session": "Phiên"
+      },
+      "targetScopeHelp": {
+        "span": "Đánh giá từng span khớp một cách độc lập.",
+        "trace": "Đánh giá toàn bộ trace sau khi cửa sổ hoàn tất đóng.",
+        "session": "Đánh giá một phiên xuyên suốt các trace sau khi cửa sổ hoàn tất đóng."
+      },
+      "completionSection": "Tiêu chí hoàn tất",
+      "completionHelp": {
+        "trace": "Trace được đánh giá ngay khi điều kiện đầu tiên trong số này được đáp ứng.",
+        "session": "Phiên được đánh giá ngay khi điều kiện đầu tiên trong số này được đáp ứng."
+      },
+      "idleWindowLabel": "Cửa sổ không hoạt động (giây)",
+      "idleWindowHelp": "Được đánh giá sau {duration} không có span mới.",
+      "idleWindowHelpEmpty": "Được đánh giá khi không có span mới nào đến.",
+      "maxAgeLabel": "Tuổi tối đa (giây)",
+      "maxAgeHelp": "Được đánh giá sau {duration} kể từ span đầu tiên.",
+      "maxAgeHelpEmpty": "Được đánh giá ở một tuổi cố định, ngay cả khi các span vẫn đang đến.",
       "descriptionLabel": "Mô tả",
       "samplingModeLabel": "Chế độ lấy mẫu",
-      "samplingValueLabel": "Giá trị lấy mẫu JSON",
+      "samplingValueLabel": "Tỷ lệ lấy mẫu",
       "samplingModes": {
         "rate": "Tỷ lệ",
         "all": "Tất cả",
@@ -8561,7 +8721,11 @@
       },
       "scorerPicker": {
         "title": "Bộ chấm điểm",
-        "hint": "Chọn một hoặc nhiều bộ chấm điểm để chạy cho mỗi span khớp.",
+        "hint": {
+          "span": "Chọn một hoặc nhiều bộ đánh giá để chạy cho mỗi span khớp.",
+          "trace": "Chọn một hoặc nhiều bộ đánh giá để chạy cho mỗi trace đủ điều kiện.",
+          "session": "Chọn một hoặc nhiều bộ đánh giá để chạy cho mỗi session đủ điều kiện."
+        },
         "meta": "{type} · v{version}",
         "placeholder": "Chọn bộ chấm điểm",
         "searchPlaceholder": "Tìm kiếm bộ chấm điểm…",
@@ -8569,21 +8733,113 @@
       },
       "filter": {
         "title": "Điều kiện lọc",
-        "hint": "Chỉ các span khớp với điều kiện này mới tham gia lấy mẫu và chấm điểm."
+        "hint": {
+          "span": "Chỉ các span khớp với điều kiện này mới được đưa vào lấy mẫu và đánh giá.",
+          "trace": "Một trace được đưa vào lấy mẫu và đánh giá nếu bất kỳ span nào của nó khớp với điều kiện này.",
+          "session": "Một session được đưa vào lấy mẫu và đánh giá nếu bất kỳ span nào của nó khớp với điều kiện này."
+        }
+      },
+      "selector": {
+        "title": "Span nào (Tùy chọn)",
+        "hint": {
+          "trace": "Để trống để bao gồm mọi span trong trace."
+        }
+      },
+      "endSignal": {
+        "title": "Tín hiệu kết thúc (tùy chọn)",
+        "hint": {
+          "trace": "Xác định điều kiện span để đóng trace ngay lập tức khi bất kỳ span nào khớp.",
+          "session": "Xác định điều kiện span để đóng session ngay lập tức khi bất kỳ span nào khớp."
+        }
       },
       "inputMapping": {
-        "title": "Ánh xạ đầu vào",
-        "hint": "Ánh xạ các trường span vào từng biến mẫu của người chấm điểm.",
+        "title": "Biến prompt",
+        "hint": {
+          "span": "Ánh xạ mỗi biến tới trường span cung cấp giá trị của nó.",
+          "trace": "Giá trị trace tự động điền. Ánh xạ bất kỳ thứ gì khác tới một trường span.",
+          "session": "Giá trị session tự động điền. Ánh xạ bất kỳ thứ gì khác tới một trường span."
+        },
         "selectScorers": "Chọn người chấm điểm để cấu hình ánh xạ của họ.",
         "noVariables": "Người chấm điểm này không có biến mẫu nào để ánh xạ.",
-        "variableCount": "{count} biến"
+        "variableCount": "{count} biến",
+        "systemProvided": {
+          "title": "Biến {scope}",
+          "description": "OpenObserve cung cấp các giá trị này từ chính {scope}. Một prompt của bộ đánh giá có thể sử dụng trực tiếp chúng — không cần ánh xạ.",
+          "badge": "Do hệ thống cung cấp",
+          "selectorRequired": "Yêu cầu Span Selector",
+          "columns": {
+            "variable": "Biến prompt",
+            "source": "Nguồn",
+            "description": "Giá trị được cung cấp"
+          },
+          "variables": {
+            "input": {
+              "trace": "Đầu vào từ span gốc của trace."
+            },
+            "output": {
+              "trace": "Đầu ra từ span gốc của trace."
+            },
+            "statistics": {
+              "trace": "Chỉ số trace: số lượng span, thời lượng, lệnh gọi LLM và công cụ, lỗi, token và chi phí.",
+              "session": "Chỉ số session: số lượng trace và turn, thời lượng và lỗi."
+            },
+            "spans": {
+              "trace": "Một tập hợp con được lọc của các span, được chọn bởi Span Selector của job."
+            },
+            "steps": {
+              "trace": "Các span theo thứ tự thời gian; phần giữa được gập lại khi trace rất dài.",
+              "session": "Các trace theo thứ tự thời gian, được biểu diễn dưới dạng các lượt hội thoại."
+            }
+          }
+        }
+      },
+      "spanSelector": {
+        "select": "Chọn Span Selector",
+        "bindingHelp": "Trace có thể có hàng trăm span. Chọn những span mà bộ đánh giá này nên xem xét.",
+        "createForScorer": "Tạo cho bộ đánh giá",
+        "createForScorerTitle": "Tạo Span Selector cho bộ đánh giá này",
+        "editorTitle": "Span Selector",
+        "name": "Tên bộ chọn",
+        "schemaMode": "Trường cần đọc",
+        "defaultSchema": "Trường GenAI chuẩn",
+        "customSchema": "Trường tùy chỉnh",
+        "defaultSchemaHelp": "Tám trường này được đọc từ mọi span khớp. Bất kỳ trường nào thiếu sẽ được coi là trống.",
+        "fields": "Trường",
+        "fieldsHelp": "Chỉ các trường này được đọc — không có gì khác được gửi đến bộ đánh giá.",
+        "maximumSpans": "Số span tối đa",
+        "budget": "Giới hạn số lượng span được chọn từ trace.",
+        "validation": {
+          "name": "Nhập tên bộ chọn.",
+          "duplicateName": "Tên bộ chọn phải là duy nhất trong job này.",
+          "filter": "Hoàn thành hoặc xóa điều kiện lọc chưa hoàn thiện.",
+          "fields": "Chọn ít nhất một trường cho schema tùy chỉnh.",
+          "maximumSpans": "Số spans tối đa phải là số nguyên dương.",
+          "budget": "Quá nhiều spans cho các trường đã chọn. Giảm số lượng span hoặc đọc ít trường hơn.",
+          "binding": "Chọn một Span Selector cho mỗi bộ chấm điểm."
+        }
       },
       "preview": {
-        "title": "Span đã khớp",
-        "hint": "Khi bạn đã chọn một luồng và bộ lọc, bảng này sẽ hiển thị số span mà công việc của bạn sẽ khớp.",
-        "matchedSuffix": "span đã khớp · 24h qua",
+        "scopes": {
+          "span": {
+            "title": "Spans khớp",
+            "hint": "Sau khi chọn luồng và bộ lọc, bảng này sẽ hiển thị số lượng spans công việc của bạn sẽ khớp.",
+            "matchedSuffix": "spans khớp · 24h qua",
+            "matchedLoading": "Đang đếm spans khớp…"
+          },
+          "trace": {
+            "title": "Traces khớp",
+            "hint": "Sau khi chọn luồng và bộ lọc, bảng này sẽ hiển thị số lượng traces công việc của bạn sẽ khớp.",
+            "matchedSuffix": "traces khớp · 24h qua",
+            "matchedLoading": "Đang đếm traces khớp…"
+          },
+          "session": {
+            "title": "Sessions khớp",
+            "hint": "Sau khi chọn luồng và bộ lọc, bảng này sẽ hiển thị số lượng sessions công việc của bạn sẽ khớp.",
+            "matchedSuffix": "sessions khớp · 24h qua",
+            "matchedLoading": "Đang đếm sessions khớp…"
+          }
+        },
         "matchedError": "Không thể tải số lượng khớp",
-        "matchedLoading": "Đang đếm span đã khớp…",
         "matchedIncomplete": "Hoàn thành điều kiện lọc để cập nhật số lượng.",
         "summaryTitle": "Tóm tắt",
         "summaryName": "Tên",
@@ -8600,6 +8856,7 @@
       "validation": {
         "nameRequired": "Tên công việc là bắt buộc",
         "streamRequired": "Một luồng là bắt buộc",
+        "idleWindowMinimum": "Cửa sổ không hoạt động phải ít nhất 45 giây",
         "samplingValueRequired": "Một giá trị lấy mẫu là bắt buộc"
       }
     }

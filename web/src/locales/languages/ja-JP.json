@@ -7718,7 +7718,7 @@
       "sessions": "エージェントセッションを順番に閲覧して確認する",
       "agentGraph": "エージェントが操作するもの（ツール、モデル、サービス、データストア）を確認",
       "agentBehavior": "ループにはまったエージェントと、それらを失敗させるエラーを特定します",
-      "quality": "LLM回答の質をスコアリングして追跡する",
+      "quality": "スパン、トレース、セッション評価におけるスコア品質を追跡",
       "evalJobs": "セッション全体で評価ジョブを実行および監視する",
       "scorers": "LLM アウトプットを採点するスコアラーの作成と管理",
       "scoreConfigs": "評価に使用するスコアリングルーブリックを設定します"
@@ -7868,7 +7868,22 @@
     },
     "quality": {
       "scopeLabel": "このワークスペースのすべての品質ディメンション",
+      "agentLabel": "エージェント",
       "agentPlaceholder": "すべてのエージェント",
+      "kpisAriaLabel": "ティア1 KPI",
+      "dataTypes": {
+        "numericShort": "数値",
+        "categoricalShort": "カテゴリ",
+        "booleanShort": "真偽値"
+      },
+      "scopes": {
+        "filterLabel": "スコアスコープ",
+        "filterHint": "このスコア設定を評価対象スコープ間で比較します。",
+        "all": "すべて",
+        "span": "スパン",
+        "trace": "トレース",
+        "session": "セッション"
+      },
       "timeRange": {
         "label": "時間範囲",
         "last1h": "過去 1 時間",
@@ -7882,20 +7897,20 @@
       },
       "refresh": "リフレッシュ",
       "kpis": {
-        "evaluated": {
-          "title": "評価済みトレース",
+        "scoreResults": {
+          "title": "スコア結果",
           "unit": "",
-          "hint": "ウィンドウ内の _llm_score 内の個別のトレース ID"
+          "hint": "ウィンドウ内のスパン、トレース、セッション評価における最新のスコア結果"
         },
         "evaluationCost": {
           "title": "評価コスト",
           "unit": "$",
           "hint": "ウィンドウに表示される LLM ジャッジスコアラー費用の合計"
         },
-        "jobSuccess": {
-          "title": "仕事の成功",
+        "scorerSuccess": {
+          "title": "スコアラ成功",
           "unit": "%",
-          "hint": "オンライン評価ジョブの実行成功率"
+          "hint": "全スコアラ呼び出しに対する成功したスコアラ呼び出しの割合"
         },
         "scorerFailures": {
           "title": "スコアラーの失敗",
@@ -7903,11 +7918,12 @@
           "hint": "ウィンドウでのスコアラーの呼び出しが失敗しました"
         },
         "latencyP95": {
-          "title": "レイテンシー p95",
+          "title": "スコアラレイテンシ p95",
           "unit": "s",
-          "hint": "スコアーコール p95 レイテンシー"
+          "hint": "95パーセンタイルのスコアラ呼び出しレイテンシ"
         },
         "vsPrev": "対前へ",
+        "noPriorData": "過去データなし",
         "noData": "—"
       },
       "loading": "品質データを読み込んでいます...",
@@ -7916,7 +7932,9 @@
         "noData": "このウィンドウには、この構成のスコアはまだありません。",
         "empty": {
           "title": "最初のスコアを待っています",
-          "description": "選択した時間範囲では、この設定のスコアはまだ取得されていません。この設定を使用するスコアラーが実行されると、ここに自動的に表示されます。"
+          "titleScoped": "このウィンドウに{scope}スコアはありません",
+          "description": "選択した時間範囲では、この設定のスコアはまだ取得されていません。この設定を使用するスコアラーが実行されると、ここに自動的に表示されます。",
+          "descriptionScoped": "選択した時間範囲では、この設定の{scope}スコアが届いていません。別のスコープを選択するか、時間範囲を広げてください。"
         },
         "drillTitle": "ドリル・トゥ・トレース",
         "trendTitle": "トレンド",
@@ -7925,12 +7943,18 @@
         "compositionTitle": "時間の経過に伴う構成",
         "categoryDistributionTitle": "カテゴリ分布",
         "passRateTitle": "経時的な合格率",
+        "healthyRateTitle": "経時的な健全率",
+        "trueRateTitle": "経時的な真率",
         "trueFalseTitle": "真と偽",
         "legendAvg": "平均",
         "legendP95": "95",
         "legendThreshold": "しきい値 {方向} {値}",
         "legendHealthy": "健康",
         "legendUnhealthy": "不健全です",
+        "legendHealthyRate": "健全率",
+        "legendTrueRate": "真率",
+        "legendTrueCount": "真 ({count})",
+        "legendFalseCount": "偽 ({count})",
         "kpis": {
           "average": "アベレージ",
           "p50": "50",
@@ -7938,11 +7962,49 @@
           "p50p95": "P50/P95",
           "unhealthy": "不健康",
           "healthy": "ヘルシー",
-          "coverage": "カバレッジ"
+          "trueRate": "真率",
+          "falseRate": "偽率",
+          "coverage": "カバレッジ",
+          "targetsScored": "スコアリングされたターゲット"
+        },
+        "health": {
+          "title": "健全性ステータス",
+          "noThreshold": "健全性しきい値が設定されていません。スコアを健全または低下として分類できません。",
+          "thresholdOnly": "{threshold} の場合健全",
+          "summary": "しきい値を{percent}%下回る · {threshold}の場合健全"
+        }
+      },
+      "runs": {
+        "title": "評価スコア",
+        "hint": "スコアと推論は_llm_scoresから取得されます。実行を選択して、その評価者トレースを開き、さらに調査してください。",
+        "filterLabel": "評価スコアをフィルタ",
+        "footerTitle": "評価スコア",
+        "noThresholdHint": "このスコア設定に健全性しきい値を設定して、不健全なスコアを分類して強調表示します。",
+        "noReasoning": "推論が記録されていません",
+        "unknownAgent": "不明なエージェント",
+        "unknownScope": "不明なスコープ",
+        "queryError": "評価スコアを更新できませんでした。最後に成功したページが表示されています。",
+        "empty": "この時間範囲に評価スコアはありません。",
+        "emptyUnhealthy": "この時間範囲に不健全なスコアはありません。",
+        "filters": {
+          "all": "すべてのスコア",
+          "unhealthy": "不健全"
+        },
+        "health": {
+          "healthy": "健全",
+          "unhealthy": "不健全"
+        },
+        "columns": {
+          "time": "評価済み",
+          "result": "スコア",
+          "reasoning": "推論",
+          "target": "ターゲット",
+          "agent": "エージェント"
         }
       },
       "sidebar": {
         "allConfigs": "すべての構成",
+        "scoreCount": "{count} スコア",
         "empty": "このフィルターに一致する設定はありません。"
       },
       "overview": {
@@ -7959,13 +8021,30 @@
         "waitingPrimaryCta": "評価ジョブを開く",
         "waitingRefreshCta": "リフレッシュ",
         "noThreshold": "敷居なし",
+        "relativeTime": {
+          "daysAgo": "{day}日前",
+          "monthsAgo": "{month}ヶ月前"
+        },
+        "status": {
+          "healthy": "正常",
+          "unhealthy": "要注意",
+          "noThreshold": "しきい値未設定",
+          "noData": "スコアデータなし"
+        },
+        "health": {
+          "thresholdSummary": "{percent}% 以下 · {threshold} なら正常",
+          "noThresholdHint": "正常しきい値を設定",
+          "noDataHint": "このウィンドウにスコアなし"
+        },
         "columns": {
+          "health": "健全性",
           "scoreConfig": "スコア設定",
           "type": "タイプ",
+          "quality": "品質",
           "totalScores": "合計得点",
-          "coverage": "カバレッジ",
+          "scopeMix": "スコープ混合",
           "unhealthy": "不健康",
-          "trend": "トレンド",
+          "volumeTrend": "ボリュームトレンド",
           "threshold": "もし健康なら",
           "updated": "更新済み"
         }
@@ -7993,11 +8072,10 @@
     "buttons": {
       "cancel": "[キャンセル]",
       "close": "閉じる",
-      "create": "作成",
       "remove": "削除",
       "save": "[保存]",
       "saveAsDraft": "下書きとして保存",
-      "createAndActivate": "作成して有効化"
+      "createAndActivate": "保存して有効化"
     },
     "scorerTypeDialog": {
       "title": "新しいスコアラーを作成",
@@ -8082,7 +8160,6 @@
         "updatedLabel": "更新日"
       },
       "createTitle": "新しいスコア設定",
-      "editTitlePrefix": "編集",
       "subtitle": "スコア設定は、スコアの種類、ヘルスしきい値、およびカテゴリを定義します。",
       "eyebrow": "スコア設定",
       "sectionTitle": "スコア設定",
@@ -8091,8 +8168,6 @@
       "searchPlaceholder": "設定を検索",
       "allTypes": "すべての型",
       "newButton": "新しいスコア設定",
-      "saveButton": "変更を保存",
-      "createButton": "作成",
       "columns": {
         "index": "#",
         "name": "名前",
@@ -8297,14 +8372,13 @@
       "backTo": "スコアラーに戻る",
       "badgeRemote": "リモート",
       "badgeLlm": "LLMジャッジ",
-      "createTitleRemote": "リモートスコアラーを作成",
-      "createTitleLlm": "LLM ジャッジスコアラーを作成",
-      "editTitleRemote": "リモートスコアラーの編集",
-      "editTitleLlm": "LLM ジャッジスコアラーの編集",
+      "createTitleRemote": "新しいリモートスコアラー",
+      "createTitleLlm": "新しいLLMジャッジスコアラー",
+      "editTitleRemote": "リモートスコアラーを更新",
+      "editTitleLlm": "LLMジャッジスコアラーを更新",
       "subtitleRemote": "ホストしている HTTP エンドポイントを呼び出します。リクエストをレンダリングすると、スコアが返されます。",
-      "subtitleLlm": "言語モデルは、指定したプロンプトを使用して各トレースを判断します。",
+      "subtitleLlm": "言語モデルが、指定されたプロンプトを使用して各評価ターゲットを判定します。",
       "descriptionPlaceholder": "このスコアラーが測定する内容の簡単な概要。",
-      "producesScoreHelp": "このスコアラーはどのディメンションを測定しますか？",
       "providerHelp": "このジャッジが呼び出すLLMプロバイダーを選択します。プロバイダーは{settingsLink}で管理します。",
       "providerHelpSettingsLink": "設定",
       "refreshProviders": "プロバイダーを更新",
@@ -8317,8 +8391,49 @@
       "rangeLabel": "範囲:",
       "healthyLabel": "健全性:",
       "typeLabel": "型:",
-      "promptVariablesLabel": "変数:",
-      "promptHelp": "評価ロジックに集中してください。{inputVar} と {outputVar} をプレースホルダーとして使用します。",
+      "promptVariablesLabel": "このプロンプトの変数:",
+      "promptVariableGuide": {
+        "title": "利用可能なプロンプト変数",
+        "description": "これらの変数は上記のプロンプトで使用できます。各変数の値は、Eval Jobが評価する対象によって決まります。",
+        "columns": {
+          "variable": "プロンプト変数"
+        },
+        "scopes": {
+          "span": "スパン",
+          "trace": "トレース",
+          "session": "セッション"
+        },
+        "statuses": {
+          "jobMapped": "Eval Jobでマッピング",
+          "systemProvided": "システム提供",
+          "requiresSelector": "システム提供 · Span Selectorが必要",
+          "selectorRequired": "Span Selectorが必要",
+          "unavailable": "利用不可"
+        },
+        "variables": {
+          "inputOutput": {
+            "span": "これらを入力と出力を保持するスパンフィールドにマッピングします。",
+            "trace": "トレースのルートスパンからの入力と出力。",
+            "session": "利用不可 — セッションには単一の入力または出力がありません。"
+          },
+          "statistics": {
+            "span": "単一のスパンを評価する場合、他のスコアラー変数と同様にこの名前をマッピングします。",
+            "trace": "トレースメトリクス: スパン数、期間、LLMおよびツール呼び出し、エラー、トークン、コスト。",
+            "session": "セッションメトリクス: トレース数とターン数、期間、エラー。"
+          },
+          "spans": {
+            "span": "単一のスパンを評価する場合、他のスコアラー変数と同様にこの名前をマッピングします。",
+            "trace": "Eval JobのSpan Selectorによって選択された、トレースのスパンのフィルタリングされたサブセット。",
+            "session": "セッションでは利用不可。"
+          },
+          "steps": {
+            "span": "単一のスパンを評価する場合、他のスコアラー変数と同様にこの名前をマッピングします。",
+            "trace": "時系列のスパン; トレースが非常に長い場合、中央は折りたたまれます。",
+            "session": "時系列のトレース。会話のターンとして表現されます。"
+          }
+        },
+        "indexDescription": "{spansVar} と {stepsVar} は JSON 配列として到着します。変数全体を参照してください — {indexedVar} のようなインデックスアクセスはサポートされていません。"
+      },
       "identitySection": "アイデンティティ",
       "judgeSection": "ジャッジ構成",
       "endpointSection": "終点",
@@ -8336,10 +8451,9 @@
       "modelPlaceholder": "gpt-4o",
       "promptLabel": "ジャッジプロンプト",
       "includeReasoningLabel": "推論を含める",
-      "includeReasoningHint": "LLMがスコアの理由を説明します。score.metadata.reasoning に保存されます。",
-      "extraFieldsLabel": "追加メタデータフィールド",
-      "extraFieldsOptional": "任意",
-      "extraFieldsHint": "スコアと併せてLLMが出力すべきフィールドを追加します。後の分析のため score.metadata に保存されます。",
+      "includeReasoningHint": "判定者はそのスコアを付けた理由を説明し、各結果とともに保存されます。",
+      "extraFieldsLabel": "追加メタデータフィールド（オプション）",
+      "extraFieldsHint": "判定者に各スコアとともに追加の値を返すよう依頼します — 例えば、カテゴリや信頼度など。",
       "extraFields": {
         "colName": "フィールド名",
         "colType": "型",
@@ -8441,9 +8555,12 @@
         "eyebrow": "評価ジョブ",
         "refresh": "更新",
         "descriptionSection": "説明",
-        "targetSection": "ターゲット",
+        "targetSection": "評価対象",
         "streamLabel": "ストリーム",
         "streamTypeLabel": "ストリームタイプ",
+        "targetScopeLabel": "各評価",
+        "idleWindowLabel": "アイドルウィンドウ",
+        "maxAgeLabel": "最大経過時間",
         "filterLabel": "フィルター",
         "filterEmpty": "フィルターなし — すべてのスパンが評価されます",
         "scorersSection": "スコアラー",
@@ -8453,13 +8570,30 @@
         "scorerTypeRemote": "リモート",
         "producesPrefix": "生成物",
         "viewScorerHint": "表示",
-        "inputMappingSection": "入力マッピング",
+        "inputMappingSection": "プロンプト変数",
         "samplingSection": "サンプリング",
         "samplingModeLabel": "モード",
         "samplingValueLabel": "値",
         "samplingAll": "一致するものをすべて評価",
         "samplingRate": "レートによるランダムサンプリング",
         "samplingCount": "最初のN件の一致",
+        "manualSection": "手動評価",
+        "manualHelp": "このジョブのスコアラーを1つの明示的なターゲットにキューイングします。手動実行は自動サンプリングをバイパスし、理由をスコアメタデータに記録します。",
+        "manualTargetIdLabel": "ターゲットID",
+        "manualSpanIdLabel": "スパンID",
+        "manualSpanIdPlaceholder": "span_id",
+        "manualTraceIdLabel": "トレースID",
+        "manualTraceIdPlaceholder": "trace_id",
+        "manualSessionIdLabel": "セッションID",
+        "manualSessionIdPlaceholder": "session_id",
+        "manualReasonLabel": "理由",
+        "manualReasonPlaceholder": "なぜこのターゲットを再実行していますか？",
+        "manualVariablesLabel": "変数JSON",
+        "manualVariablesObjectError": "変数はJSONオブジェクトである必要があります",
+        "manualTargetRequired": "ターゲットIDが必要です",
+        "manualSubmit": "手動評価を実行",
+        "manualSuccess": "キューイングされた {count} 件の評価タスク(s)",
+        "manualError": "手動評価に失敗しました",
         "metadataSection": "メタデータ",
         "versionLabel": "バージョン",
         "pipelineLabel": "パイプラインID",
@@ -8512,6 +8646,7 @@
         "name": "名前",
         "status": "ステータス",
         "stream": "ストリーム",
+        "targetScope": "スコープ",
         "scorers": "スコアラー",
         "successRate": "成功率",
         "created": "作成日",
@@ -8525,9 +8660,10 @@
         "chipSampling": "サンプリング制御"
       },
       "descriptionPlaceholder": "このジョブは何を監視しますか？",
-      "samplingValueHelp": "0 から 1 までのサンプリング率を入力します。",
-      "samplingValueAllHelp": "モードが All の場合は適用されません — 一致したすべてのイベントが評価されます。",
-      "samplingHelp": "フィルターの後に適用されます。コストを制御します — 一致したスパンのみがレートにカウントされます。",
+      "samplingValueHelp": "0から1の間のレートを入力してください。",
+      "samplingValuePreview": "一致したターゲットの {percent}% を評価します。",
+      "samplingValueAllHelp": "一致したすべてのターゲットが評価されます。",
+      "samplingHelp": "フィルタリング後に実行され、コストを制御します。",
       "presets": {
         "label": "クイックプリセット",
         "rootSpans": "ルートスパンのみ",
@@ -8535,26 +8671,49 @@
         "toolCalls": "ツール呼び出し"
       },
       "backTo": "評価ジョブに戻る",
-      "createTitle": "オンライン評価ジョブの作成",
-      "editTitle": "オンライン評価ジョブの編集",
+      "createTitle": "新しい評価ジョブ",
+      "editTitle": "評価ジョブを更新",
       "stepper": {
         "target": "ターゲット",
         "scorers": "スコアラー",
         "mapping": "マッピング",
         "sampling": "サンプリング"
       },
-      "targetSection": "ターゲット",
+      "detailsSection": "詳細",
+      "targetSection": "評価対象",
       "filteringSection": "フィルタリング",
       "scorersSection": "スコアラーとマッピング",
       "nameLabel": "[名前]",
       "namePlaceholder": "プロダクション・フィフネス・モニター",
-      "streamLabel": "入力ストリーム",
-      "streamPlaceholder": "デフォルト",
+      "streamLabel": "ストリーム",
+      "streamPlaceholder": "ストリームを選択",
       "streamTypeLabel": "ストリームタイプ",
       "streamTypePlaceholder": "トレース",
+      "targetScopeLabel": "各評価",
+      "targetScopes": {
+        "span": "スパン",
+        "trace": "トレース",
+        "session": "セッション"
+      },
+      "targetScopeHelp": {
+        "span": "一致する各スパンを個別に評価します。",
+        "trace": "完了ウィンドウが閉じた後にトレース全体を評価します。",
+        "session": "完了ウィンドウが閉じた後にトレース全体にわたってセッションを評価します。"
+      },
+      "completionSection": "完了条件",
+      "completionHelp": {
+        "trace": "これらの最初の条件が満たされた時点でトレースが評価されます。",
+        "session": "これらの最初の条件が満たされた時点でセッションが評価されます。"
+      },
+      "idleWindowLabel": "アイドルウィンドウ（秒）",
+      "idleWindowHelp": "新しいスパンがない状態で {duration} 経過後に評価されます。",
+      "idleWindowHelpEmpty": "新しいスパンが到着しなくなった時点で評価されます。",
+      "maxAgeLabel": "最大経過時間（秒）",
+      "maxAgeHelp": "最初のスパンから{duration}後に評価されます。",
+      "maxAgeHelpEmpty": "スパンがまだ到着していても、固定の経過時間で評価されます。",
       "descriptionLabel": "[説明]",
       "samplingModeLabel": "サンプリングモード",
-      "samplingValueLabel": "サンプリング率",
+      "samplingValueLabel": "サンプリングレート",
       "samplingModes": {
         "rate": "レート",
         "all": "[すべて]",
@@ -8562,7 +8721,11 @@
       },
       "scorerPicker": {
         "title": "スコアラー",
-        "hint": "マッチしたすべてのスパンで走るスコアラーを 1 人以上選択します。",
+        "hint": {
+          "span": "一致する各スパンに対して実行するスコアラーを1つ以上選択してください。",
+          "trace": "対象となる各トレースに対して実行するスコアラーを1つ以上選択してください。",
+          "session": "対象となる各セッションに対して実行するスコアラーを1つ以上選択してください。"
+        },
         "meta": "{タイプ} · v {バージョン}",
         "placeholder": "スコアラーを選択",
         "searchPlaceholder": "スコアラーを検索…",
@@ -8570,21 +8733,113 @@
       },
       "filter": {
         "title": "フィルター条件",
-        "hint": "この条件に一致するスパンのみがサンプリングとスコアリングに入ります。"
+        "hint": {
+          "span": "この条件に一致するスパンのみがサンプリングとスコアリングに入ります。",
+          "trace": "トレースは、そのスパンのいずれかがこの条件に一致する場合、サンプリングとスコアリングに入ります。",
+          "session": "セッションは、そのスパンのいずれかがこの条件に一致する場合、サンプリングとスコアリングに入ります。"
+        }
+      },
+      "selector": {
+        "title": "どのスパン（オプション）",
+        "hint": {
+          "trace": "空のままにすると、トレース内のすべてのスパンが含まれます。"
+        }
+      },
+      "endSignal": {
+        "title": "終了シグナル（オプション）",
+        "hint": {
+          "trace": "任意のスパンが一致したときにトレースを即座に閉じるスパン条件を定義します。",
+          "session": "任意のスパンが一致したときにセッションを即座に閉じるスパン条件を定義します。"
+        }
       },
       "inputMapping": {
-        "title": "入力マッピング",
-        "hint": "スパンフィールドを各スコアラーテンプレート変数にマップします。",
+        "title": "プロンプト変数",
+        "hint": {
+          "span": "各変数をその値を提供するスパンフィールドにマッピングします。",
+          "trace": "トレース値は自動的に入力されます。その他はスパンフィールドにマッピングします。",
+          "session": "セッション値は自動的に入力されます。その他はスパンフィールドにマッピングします。"
+        },
         "selectScorers": "スコアラーを選択してマッピングを設定します。",
         "noVariables": "このスコアラーには、マップするテンプレート変数がありません。",
-        "variableCount": "{カウント} 変数"
+        "variableCount": "{カウント} 変数",
+        "systemProvided": {
+          "title": "{scope} 変数",
+          "description": "OpenObserveはこれらの値を{scope}自体から提供します。スコアラーのプロンプトはそれらを直接使用できます—マッピングは不要です。",
+          "badge": "システム提供",
+          "selectorRequired": "スパンセレクターが必要",
+          "columns": {
+            "variable": "プロンプト変数",
+            "source": "ソース",
+            "description": "提供される値"
+          },
+          "variables": {
+            "input": {
+              "trace": "トレースのルートスパンからの入力。"
+            },
+            "output": {
+              "trace": "トレースのルートスパンからの出力。"
+            },
+            "statistics": {
+              "trace": "トレースメトリクス：スパン数、期間、LLMおよびツール呼び出し、エラー、トークン、コスト。",
+              "session": "セッションメトリクス：トレース数とターン数、期間、エラー。"
+            },
+            "spans": {
+              "trace": "ジョブのスパンセレクターによって選択された、フィルタリングされたスパンのサブセット。"
+            },
+            "steps": {
+              "trace": "時間順のスパン。トレースが非常に長い場合、中央が折りたたまれます。",
+              "session": "時間順のトレース。会話のターンとして表現されます。"
+            }
+          }
+        }
+      },
+      "spanSelector": {
+        "select": "スパンセレクターを選択",
+        "bindingHelp": "トレースには数百のスパンが含まれる可能性があります。このスコアラーが参照するスパンを選択してください。",
+        "createForScorer": "スコアラー用に作成",
+        "createForScorerTitle": "このスコアラーのスパンセレクターを作成",
+        "editorTitle": "スパンセレクター",
+        "name": "セレクター名",
+        "schemaMode": "読み取りフィールド",
+        "defaultSchema": "標準GenAIフィールド",
+        "customSchema": "カスタムフィールド",
+        "defaultSchemaHelp": "これらの8つのフィールドは、一致するすべてのスパンから読み取られます。不足しているものは空として渡されます。",
+        "fields": "フィールド",
+        "fieldsHelp": "これらのフィールドのみが読み取られます—それ以外はスコアラーに送信されません。",
+        "maximumSpans": "最大スパン数",
+        "budget": "トレースから選択されるスパン数を制限します。",
+        "validation": {
+          "name": "セレクター名を入力してください。",
+          "duplicateName": "セレクター名はこのジョブ内で一意である必要があります。",
+          "filter": "未完了のフィルター条件を完了するか削除してください。",
+          "fields": "カスタムスキーマには少なくとも1つのフィールドを選択してください。",
+          "maximumSpans": "最大スパンは正の整数でなければなりません。",
+          "budget": "選択したフィールドに対してスパンが多すぎます。スパン数を減らすか、読み取るフィールドを減らしてください。",
+          "binding": "各スコアラーにスパンセレクターを選択してください。"
+        }
       },
       "preview": {
-        "title": "プレビュー",
-        "hint": "左側のフィールドを使用して、生産評価目標を定義します。",
-        "matchedSuffix": "スパン一致·過去 24 時間",
+        "scopes": {
+          "span": {
+            "title": "一致したスパン",
+            "hint": "ストリームとフィルターを選択すると、このパネルにジョブが一致するスパンの数が表示されます。",
+            "matchedSuffix": "一致したスパン · 過去24時間",
+            "matchedLoading": "一致したスパンをカウント中…"
+          },
+          "trace": {
+            "title": "一致したトレース",
+            "hint": "ストリームとフィルターを選択すると、このパネルにジョブが一致するトレースの数が表示されます。",
+            "matchedSuffix": "一致したトレース · 過去24時間",
+            "matchedLoading": "一致したトレースをカウント中…"
+          },
+          "session": {
+            "title": "一致したセッション",
+            "hint": "ストリームとフィルターを選択すると、このパネルにジョブが一致するセッションの数が表示されます。",
+            "matchedSuffix": "一致したセッション · 過去24時間",
+            "matchedLoading": "一致したセッションをカウント中…"
+          }
+        },
         "matchedError": "マッチカウントを読み込めませんでした",
-        "matchedLoading": "一致したスパンをカウント中...",
         "matchedIncomplete": "フィルター条件を終了してカウントを更新します。",
         "summaryTitle": "サマリー",
         "summaryName": "[名前]",
@@ -8601,6 +8856,7 @@
       "validation": {
         "nameRequired": "Job name is required",
         "streamRequired": "A stream is required",
+        "idleWindowMinimum": "アイドルウィンドウは45秒以上である必要があります。",
         "samplingValueRequired": "A sampling value is required"
       }
     }
